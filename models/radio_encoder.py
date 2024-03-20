@@ -1,54 +1,37 @@
 import torch
-import torch.nn as nn
 import torchvision
+import torch.nn as nn
+from einops.layers.torch import Rearrange
+from torchvision.models import ViT_H_14_Weights
+from torchvision.models.feature_extraction import create_feature_extractor
 
-img = torch.randn(1, 3, 224, 224)
 
-model = torchvision.models.vit_b_16()
-feature_extractor = nn.Sequential(*list(model.children())[:-1])
-# print(model)
+class RadioEncoder(nn.Module):
+    def __init__(self, image_size=224):
+        super(RadioEncoder, self).__init__()
+        self.patch_size = 14
+        # TODO: Add pretrained weights
+        self.feature_extractor = create_feature_extractor(torchvision.models.vit_h_14(),
+                                                          return_nodes={"encoder.ln": "features"})
+        self.feature_reshape = Rearrange('b (p1 p2) d -> b d p1 p2', p1=image_size // self.patch_size,
+                                         p2=image_size // self.patch_size)
+        self.channel_resize = nn.Conv2d(torchvision.models.vit_h_14().hidden_dim, 256, kernel_size=1, stride=1,
+                                        padding=0, bias=False)
 
-# This is supposed to be the PREPROCESS
-# But it is not done correctly, since the reshaping and permutation is not done
-# Only the concolution
-conv = feature_extractor[0]
+    def forward(self, image):
+        x = self.feature_extractor(image)
+        x = x['features']
+        x = x[:, 1:]
+        x = self.feature_reshape(x)
+        print(x.shape)
+        x = self.channel_resize(x)
+        return x
 
-# -> print(conv(img).shape)
-# -> torch.Size([1, 768, 14, 14])
-# This is not the desired output after preprocessing the image into
-# flat patches. Also in the pytorch implementation, the class token
-# and positional embedding are done extra on the forward method.
 
-# This is the whole encoder sequence
-encoder = feature_extractor[1]
-
-# The MLP head at the end is gone, since you only selected the children until -1
-# mlp = feature_extractor[2]
-
-# This is how the model preprocess the image.
-# The output shape is the one desired
-x = model._process_input(img)
-
-# -> print(x.shape)
-# -> torch.Size([1, 197, 768])
-# This is Batch x N_Patches+Class_Token x C * H_patch * W_patch
-# Meaning   1   x   14*14  +     1      x 3 * 16* 16
-
-# However, if you actually print the shape in here you only get 196 in dim=1
-# This means that the class token in missing
-# The positional_embedding is done inside the encoder, so I guess should be fine
-
-# The next code is just copy paste from the forward method in the source code
-# for the vit_b_16 from pytorch in order to get the
-
-n = x.shape[0]
-# Expand the class token to the full batch
-batch_class_token = model.class_token.expand(n, -1, -1)
-x = torch.cat([batch_class_token, x], dim=1)
-x = encoder(x)
-
-# Classifier "token" as used by standard language architectures
-print(x.shape)
-x = x[:, 0]
-print(x.shape)
-# Here you can use your own nn.Linear to map to your number of classes
+if __name__ == '__main__':
+    radio_encoder = RadioEncoder()
+    # the required input size of using pretrained weight is 224, which is close to the range-azimuth map?
+    img = torch.randn(1, 3, 224, 224)
+    with torch.no_grad():
+        output = radio_encoder(img)
+        print(output.shape)
