@@ -23,7 +23,6 @@ class RadioEncoder(nn.Module):
         x = x['features']
         x = x[:, 1:]
         x = self.feature_reshape(x)
-        print(x.shape)
         x = self.channel_resize(x)
         return x
 
