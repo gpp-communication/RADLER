@@ -14,6 +14,20 @@ def get_class_id(class_str, classes):
     return class_id
 
 
+def find_nearest(array, value):
+    """Find nearest value to 'value' in 'array'."""
+    array = np.asarray(array)
+    idx = (np.abs(array - value)).argmin()
+    return idx, array[idx]
+
+
+def ra2idx(rng, agl, range_grid, angle_grid):
+    """Mapping from absolute range (m) and azimuth (rad) to ra indices."""
+    rng_id, _ = find_nearest(range_grid, rng)
+    agl_id, _ = find_nearest(angle_grid, agl)
+    return rng_id, agl_id
+
+
 def confmap2ra(name, radordeg='rad'):
     """
     Map confidence map to range(m) and angle(deg): not uniformed angle
@@ -23,7 +37,7 @@ def confmap2ra(name, radordeg='rad'):
     :return: mapping grids
     """
     # TODO: add more args for different network settings
-    Fs = 4e6
+    Fs = 4e6  # bandwidth
     sweepSlope = 21.0017e12
     num_crop = 3
     fft_Rang = 128 + 2 * num_crop
@@ -45,7 +59,7 @@ def confmap2ra(name, radordeg='rad'):
         if radordeg == 'deg':
             agl_grid = np.degrees(np.arcsin(w))  # rad to deg
         elif radordeg == 'rad':
-            agl_grid = np.arcsin(w)
+            agl_grid = np.arcsin(w)  # -pi/2 - pi/2
         else:
             raise TypeError
         return agl_grid
@@ -67,11 +81,12 @@ def generate_confmap(n_obj, obj_info, config_dict, gaussian_thres=36):
     confmap_sigmas_interval = config_dict['confmap_cfg']['confmap_sigmas_interval']
     confmap_length = config_dict['confmap_cfg']['confmap_length']
     range_grid = confmap2ra(name='range')
+    angle_grid = confmap2ra(name='angle')
 
     confmap = np.zeros((n_class, 128, 128), dtype=float)
     for objid in range(n_obj):
-        rng_idx = obj_info['center_ids'][objid][0]
-        agl_idx = obj_info['center_ids'][objid][1]
+        rng_idx, agl_idx = ra2idx(obj_info['centers'][objid][0], obj_info['centers'][objid][1], range_grid, angle_grid)
+        print(rng_idx, agl_idx)
         class_name = obj_info['categories'][objid]
         if class_name not in classes:
             # print("not recognized class: %s" % class_name)
@@ -94,7 +109,7 @@ def generate_confmap(n_obj, obj_info, config_dict, gaussian_thres=36):
 
 
 if __name__ == '__main__':
-    obj_info = {'center_ids': [[0, 0], [10, 10]], 'categories': ['pedestrian', 'cyclist']}
+    obj_info = {'centers': [[12.0443, -0.0175], [11.5982, 0.3840]], 'categories': ['pedestrian', 'cyclist']}
     confmap_dict = {'confmap_cfg': dict(
         confmap_sigmas={
             'pedestrian': 15,
@@ -119,3 +134,4 @@ if __name__ == '__main__':
         }
     )}
     print(generate_confmap(2, obj_info, confmap_dict))
+    # print(confmap2ra('angle'))
