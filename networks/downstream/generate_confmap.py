@@ -37,7 +37,7 @@ def confmap2ra(name, radordeg='rad'):
     :return: mapping grids
     """
     # TODO: add more args for different network settings
-    Fs = 4e6  # bandwidth
+    Fs = 4e6  # sample frequency
     sweepSlope = 21.0017e12
     num_crop = 3
     fft_Rang = 128 + 2 * num_crop
@@ -47,7 +47,7 @@ def confmap2ra(name, radordeg='rad'):
     if name == 'range':
         freq_res = Fs / fft_Rang
         freq_grid = np.arange(fft_Rang) * freq_res
-        rng_grid = freq_grid * c / sweepSlope / 2
+        rng_grid = freq_grid * c / sweepSlope / 2  # freq_grid / sweepSlop = time_grid
         rng_grid = rng_grid[num_crop:fft_Rang - num_crop]
         return rng_grid
 
