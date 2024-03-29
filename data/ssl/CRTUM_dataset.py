@@ -20,7 +20,6 @@ class CRTUMDataset(Dataset):
                 images.append(os.path.join(images_folder, image_file))
             for radar_file in os.listdir(radar_frames_folder):
                 radar_frames.append(os.path.join(radar_frames_folder, radar_file))
-        print(images, radar_frames)
         self.df = pd.DataFrame(np.column_stack([images, radar_frames]), columns=['image', 'radar_frame'])
 
     def __len__(self):
