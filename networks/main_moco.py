@@ -15,8 +15,8 @@ import shutil
 import time
 import warnings
 
-import ssl.moco.builder 
-import ssl.moco.loader
+import ssl.moco.builder as builder
+import ssl.moco.loader as loader
 import torch
 import torch.backends.cudnn as cudnn
 import torch.distributed as dist
@@ -245,7 +245,7 @@ def main_worker(gpu, ngpus_per_node, args):
         )
     # create model
     print("=> creating model '{}'".format(args.arch))
-    model = moco.builder.MoCo(
+    model = builder.MoCo(
         models.__dict__[args.arch],
         args.moco_dim,
         args.moco_k,
@@ -331,7 +331,7 @@ def main_worker(gpu, ngpus_per_node, args):
                 [transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8  # not strengthened
             ),
             transforms.RandomGrayscale(p=0.2),
-            transforms.RandomApply([moco.loader.GaussianBlur([0.1, 2.0])], p=0.5),
+            transforms.RandomApply([loader.GaussianBlur([0.1, 2.0])], p=0.5),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
             normalize,
