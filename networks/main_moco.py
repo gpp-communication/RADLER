@@ -14,6 +14,7 @@ import random
 import shutil
 import time
 import warnings
+import subprocess
 
 import ssl.moco.builder as builder
 import ssl.moco.loader as loader
@@ -232,7 +233,14 @@ def main_worker(gpu, ngpus_per_node, args):
 
     if args.distributed:
         if args.dist_url == "env://" and args.rank == -1:
-            args.rank = int(os.environ["RANK"])
+            args.rank = int(os.environ["SLURM_PROCID"])
+        if "MASTER_ADDR" not in os.environ:
+            node_list = os.environ["SLURM_NODELIST"]
+            os.environ["MASTER_ADDR"] = subprocess.getoutput(f"scontrol show hostname {node_list} | head -n1")
+            if "MASTER_PORT" in os.environ:
+                pass  # use MASTER_PORT in the environment variable
+            else:
+                os.environ["MASTER_PORT"] = "29500"
         if args.multiprocessing_distributed:
             # For multiprocessing distributed training, rank needs to be the
             # global rank among all the processes
@@ -243,6 +251,7 @@ def main_worker(gpu, ngpus_per_node, args):
             world_size=args.world_size,
             rank=args.rank,
         )
+
     # create model
     print("=> creating model '{}'".format(args.arch))
     model = builder.MoCo(
@@ -348,7 +357,7 @@ def main_worker(gpu, ngpus_per_node, args):
         ]
 
     train_dataset = datasets.ImageFolder(
-        traindir, moco.loader.TwoCropsTransform(transforms.Compose(augmentation))
+        traindir, loader.TwoCropsTransform(transforms.Compose(augmentation))
     )
 
     if args.distributed:
