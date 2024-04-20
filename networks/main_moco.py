@@ -113,6 +113,12 @@ parser.add_argument(
     help="print frequency (default: 10)",
 )
 parser.add_argument(
+    "--checkpoints-dir",
+    default='../logs/checkpoints/ssl',
+    type=str,
+    help="folder path to save checkpoints"
+)
+parser.add_argument(
     "--resume",
     default="",
     type=str,
@@ -394,6 +400,7 @@ def main_worker(gpu, ngpus_per_node, args):
                     "optimizer": optimizer.state_dict(),
                 },
                 is_best=False,
+                checkpoints_dir=args.checkpoints_dir,
                 filename="checkpoint_{:04d}.pth.tar".format(epoch),
             )
 
@@ -446,10 +453,10 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
             progress.display(i)
 
 
-def save_checkpoint(state, is_best, filename="checkpoint.pth.tar"):
-    torch.save(state, filename)
+def save_checkpoint(state, is_best, checkpoints_dir, filename="checkpoint.pth.tar"):
+    torch.save(state, os.path.join(checkpoints_dir, filename))
     if is_best:
-        shutil.copyfile(filename, "model_best.pth.tar")
+        shutil.copyfile(os.path.join(checkpoints_dir, filename), os.path.join(checkpoints_dir, "model_best.pth.tar"))
 
 
 class AverageMeter:
