@@ -1,1 +1,1 @@
-srun --nodes=2 --cpus-per-task=4 --gres=gpu:2 --mem=32G python -u main_moco.py '../datasets/food-101/' --epochs 20 --world-size 2 --workers 4 --dist-url 'env://' --multiprocessing-distributed
+srun --nodes=2 --cpus-per-task=4 --gres=gpu:2,VRAM=16G --mem=32G python -u main_moco.py '../datasets/food-101/' --epochs 20 --world-size 2 --workers 4 --dist-url 'env://' --multiprocessing-distributed
