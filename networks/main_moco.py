@@ -40,6 +40,7 @@ model_names = sorted(
 
 parser = argparse.ArgumentParser(description="PyTorch ImageNet Training")
 parser.add_argument("data", metavar="DIR", help="path to dataset")
+# TODO: delete this argument later
 parser.add_argument(
     "-a",
     "--arch",
@@ -177,6 +178,7 @@ parser.add_argument(
 )
 
 # options for moco v2
+# TODO: these can be removed, but safely
 parser.add_argument("--mlp", action="store_true", help="use mlp head")
 parser.add_argument(
     "--aug-plus", action="store_true", help="use moco v2 data augmentation"
