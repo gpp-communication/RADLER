@@ -20,6 +20,7 @@ class CRTUMDataset(Dataset):
                 images.append(os.path.join(images_folder, image_file))
             for radar_file in os.listdir(radar_frames_folder):
                 radar_frames.append(os.path.join(radar_frames_folder, radar_file))
+        assert len(images) == len(radar_frames), "Number of images doesn't match number of radar frames"
         self.df = pd.DataFrame(np.column_stack([images, radar_frames]), columns=['image', 'radar_frame'])
 
     def __len__(self):
@@ -28,7 +29,7 @@ class CRTUMDataset(Dataset):
     def __getitem__(self, idx):
         img_path = self.df['images'][idx]
         radar_path = self.df['radar_frames'][idx]
-        image = Image.open(img_path).convert('RGB')
+        image = Image.open(img_path).convert('RGB')  # TODO: check the RGB order in Image
         radar = sio.loadmat(radar_path)  # TODO: make sure the radar frames are stored in mat format
         radar = radar['data']  # TODO: replace the placeholder key with the correct key
         if self.image_transform is not None:
