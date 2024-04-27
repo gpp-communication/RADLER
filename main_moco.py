@@ -16,8 +16,8 @@ import time
 import warnings
 import subprocess
 
-import ssl.moco.builder as builder
-import ssl.moco.loader as loader
+import networks.ssl.moco.builder as builder
+import networks.ssl.moco.loader as loader
 from models.ssl_encoder import SSLEncoder, image_transform, radar_transfrom
 from data_tools.ssl import CRUW_dataset
 import torch
