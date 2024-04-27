@@ -18,7 +18,7 @@ import subprocess
 
 import networks.ssl.moco.builder as builder
 import networks.ssl.moco.loader as loader
-from models.ssl_encoder import SSLEncoder, image_transform, radar_transfrom
+from models.ssl_encoder import SSLEncoder, image_transform, radar_transform
 from data_tools.ssl.CRUW_dataset import CRUWDataset
 import torch
 import torch.backends.cudnn as cudnn
@@ -272,7 +272,7 @@ def main_worker(gpu, ngpus_per_node, args):
         args.moco_t,
         args.mlp,
     )
-    print(model)
+    # print(model)
 
     if args.distributed:
         # For multiprocessing distributed, DistributedDataParallel constructor
@@ -370,7 +370,7 @@ def main_worker(gpu, ngpus_per_node, args):
         traindir, loader.TwoCropsTransform(transforms.Compose(augmentation))
     )
 
-    train_dataset = CRUWDataset('./datasets/CRUW', img_transform=image_transform(), radar_transform=radar_transfrom())
+    train_dataset = CRUWDataset('./datasets/CRUW', img_transform=image_transform(), radar_transform=radar_transform())
 
     if args.distributed:
         train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)

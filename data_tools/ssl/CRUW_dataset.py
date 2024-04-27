@@ -1,3 +1,4 @@
+import torch
 import numpy as np
 from PIL import Image
 from torch.utils.data import DataLoader
@@ -20,7 +21,7 @@ class CRUWDataset(CRTUMDataset):
             image = self.image_transform(image)
         if self.radar_transform is not None:
             radar_frame = self.radar_transform(radar_frame)
-        return image, radar_frame
+        return image, radar_frame.to(dtype=torch.float32)
 
 
 def CRUW_dataloader(root, batch_size, num_workers=4, image_transform=None,
