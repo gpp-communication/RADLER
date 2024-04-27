@@ -1,6 +1,6 @@
 import numpy as np
 from PIL import Image
-from CRTUM_dataset import CRTUMDataset
+from .CRTUM_dataset import CRTUMDataset
 
 
 class CRUWDataset(CRTUMDataset):

@@ -19,7 +19,7 @@ import subprocess
 import networks.ssl.moco.builder as builder
 import networks.ssl.moco.loader as loader
 from models.ssl_encoder import SSLEncoder, image_transform, radar_transfrom
-from data_tools.ssl import CRUW_dataset
+from data_tools.ssl.CRUW_dataset import CRUWDataset
 import torch
 import torch.backends.cudnn as cudnn
 import torch.distributed as dist
@@ -370,7 +370,7 @@ def main_worker(gpu, ngpus_per_node, args):
         traindir, loader.TwoCropsTransform(transforms.Compose(augmentation))
     )
 
-    train_dataset = CRUW_dataset('../datasets/CRUW', img_transform=image_transform(), radar_transform=radar_transfrom())
+    train_dataset = CRUWDataset('./datasets/CRUW', img_transform=image_transform(), radar_transform=radar_transfrom())
 
     if args.distributed:
         train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
