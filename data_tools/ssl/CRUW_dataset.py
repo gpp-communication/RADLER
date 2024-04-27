@@ -5,8 +5,8 @@ from .CRTUM_dataset import CRTUMDataset
 
 class CRUWDataset(CRTUMDataset):
     def __getitem__(self, idx):
-        img_path = self.df['images'][idx]
-        radar_path = self.df['radar_frames'][idx]
+        img_path = self.df['image'][idx]
+        radar_path = self.df['radar_frame'][idx]
         image = Image.open(img_path).convert('RGB')
         radar_frame = np.load(radar_path)
         if self.image_transform is not None:
