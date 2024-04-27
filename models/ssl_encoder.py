@@ -2,6 +2,7 @@ import torch
 import requests
 import torchvision
 import torch.nn as nn
+import torchvision.transforms as transforms
 from PIL import Image
 from torchvision.models import ViT_H_14_Weights
 from torchvision.models.feature_extraction import create_feature_extractor
@@ -20,6 +21,17 @@ class VisionEncoder(nn.Module):
         x = x['features']
         x = x[:, 1:]
         return x
+
+def ImageTransform():
+    return ViT_H_14_Weights.IMAGENET1K_SWAG_LINEAR_V1.transforms()
+
+
+def RadarTransfrom():
+    return transforms.Compose([
+        transforms.Resize(224),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    ])
 
 
 if __name__ == '__main__':

@@ -18,7 +18,8 @@ import subprocess
 
 import ssl.moco.builder as builder
 import ssl.moco.loader as loader
-import models.ssl_encoder as ssl_encoder
+from models.ssl_encoder import ssl_encoder, ImageTransform, RadarTransfrom
+from data_tools.ssl import CRUW_dataset
 import torch
 import torch.backends.cudnn as cudnn
 import torch.distributed as dist
@@ -369,6 +370,8 @@ def main_worker(gpu, ngpus_per_node, args):
         traindir, loader.TwoCropsTransform(transforms.Compose(augmentation))
     )
 
+    train_dataset = CRUW_dataset('../datasets/CRUW', img_transform=ImageTransform(), radar_transform=RadarTransfrom())
+
     if args.distributed:
         train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
     else:
@@ -424,24 +427,24 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
     model.train()
 
     end = time.time()
-    for i, (images, _) in enumerate(train_loader):
+    for i, (images, radar_frames) in enumerate(train_loader):
         # measure data loading time
         data_time.update(time.time() - end)
 
         if args.gpu is not None:
-            images[0] = images[0].cuda(args.gpu, non_blocking=True)
-            images[1] = images[1].cuda(args.gpu, non_blocking=True)
+            images = images.cuda(args.gpu, non_blocking=True)
+            radar_frames = radar_frames.cuda(args.gpu, non_blocking=True)
 
         # compute output
-        output, target = model(im_q=images[0], im_k=images[1])
+        output, target = model(im_q=radar_frames, im_k=images)
         loss = criterion(output, target)
 
         # acc1/acc5 are (K+1)-way contrast classifier accuracy
         # measure accuracy and record loss
         acc1, acc5 = accuracy(output, target, topk=(1, 5))
-        losses.update(loss.item(), images[0].size(0))
-        top1.update(acc1[0], images[0].size(0))
-        top5.update(acc5[0], images[0].size(0))
+        losses.update(loss.item(), radar_frames.size(0))
+        top1.update(acc1[0], radar_frames.size(0))
+        top5.update(acc5[0], radar_frames.size(0))
 
         # compute gradient and do SGD step
         optimizer.zero_grad()

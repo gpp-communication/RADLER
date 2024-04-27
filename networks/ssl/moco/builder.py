@@ -30,8 +30,8 @@ class MoCo(nn.Module):
         # create the encoders
         # num_classes is the output fc dimension
         # TODO: 1 radar frame --> multiple images; radar = query, images = keys
-        self.encoder_q = base_encoder(num_classes=dim)
-        self.encoder_k = base_encoder(num_classes=dim)
+        self.encoder_q = base_encoder()
+        self.encoder_k = base_encoder()
 
         if mlp:  # hack: brute-force replacement
             dim_mlp = self.encoder_q.fc.weight.shape[1]
@@ -55,7 +55,6 @@ class MoCo(nn.Module):
         self.register_buffer("queue_ptr", torch.zeros(1, dtype=torch.long))
 
     @torch.no_grad()
-    # TODO: in our case, the query and key encoders are different architecture, so how to do momentum update?
     def _momentum_update_key_encoder(self):
         """
         Momentum update of the key encoder

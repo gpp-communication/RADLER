@@ -10,9 +10,9 @@ class CRUWDataset(CRTUMDataset):
         image = Image.open(img_path).convert('RGB')
         radar_frame = np.load(radar_path)
         if self.image_transform is not None:
-            image = self.image_transform(image)  # TODO: to tensor
+            image = self.image_transform(image)
         if self.radar_transform is not None:
-            radar_frame = self.radar_transform(radar_frame)  # TODO: to tensor
+            radar_frame = self.radar_transform(radar_frame)
         return image, radar_frame
 
 
