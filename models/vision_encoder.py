@@ -1,6 +1,8 @@
 import torch
+import requests
 import torchvision
 import torch.nn as nn
+from PIL import Image
 from torchvision.models import ViT_H_14_Weights
 from torchvision.models.feature_extraction import create_feature_extractor
 
@@ -22,8 +24,11 @@ class VisionEncoder(nn.Module):
 
 if __name__ == '__main__':
     vision_encoder = VisionEncoder()
-    print(vision_encoder.parameters())
-    img = torch.randn(1, 3, 224, 224)
+    preprocess =  ViT_H_14_Weights.IMAGENET1K_SWAG_LINEAR_V1.transforms()
+    print(preprocess)
+    img = Image.open(requests.get("https://raw.githubusercontent.com/pytorch/ios-demo-app/master/HelloWorld/HelloWorld/HelloWorld/image.png", stream=True).raw)
+    img = preprocess(img)
+    img = img.unsqueeze(0)
     with torch.no_grad():
         output = vision_encoder(img)
         print(output.shape)
