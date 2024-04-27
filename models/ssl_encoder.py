@@ -1,13 +1,15 @@
 import torch
+import requests
 import torchvision
 import torch.nn as nn
+from PIL import Image
 from torchvision.models import ViT_H_14_Weights
 from torchvision.models.feature_extraction import create_feature_extractor
 
 
-class RadioEncoder(nn.Module):
+class VisionEncoder(nn.Module):
     def __init__(self, image_size=224):
-        super(RadioEncoder, self).__init__()
+        super(VisionEncoder, self).__init__()
         self.patch_size = 14
         # TODO: Add pretrained weights
         self.feature_extractor = create_feature_extractor(torchvision.models.vit_h_14(),
@@ -21,9 +23,12 @@ class RadioEncoder(nn.Module):
 
 
 if __name__ == '__main__':
-    radio_encoder = RadioEncoder()
-    # the required input size of using pretrained weight is 224, which is close to the range-azimuth map?
-    img = torch.randn(1, 3, 224, 224)
+    vision_encoder = VisionEncoder()
+    preprocess = ViT_H_14_Weights.IMAGENET1K_SWAG_LINEAR_V1.transforms()
+    print(preprocess)
+    img = Image.open(requests.get("https://raw.githubusercontent.com/pytorch/ios-demo-app/master/HelloWorld/HelloWorld/HelloWorld/image.png", stream=True).raw)
+    img = preprocess(img)
+    img = img.unsqueeze(0)
     with torch.no_grad():
-        output = radio_encoder(img)
+        output = vision_encoder(img)
         print(output.shape)

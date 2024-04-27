@@ -18,6 +18,7 @@ import subprocess
 
 import ssl.moco.builder as builder
 import ssl.moco.loader as loader
+import models.ssl_encoder as ssl_encoder
 import torch
 import torch.backends.cudnn as cudnn
 import torch.distributed as dist
@@ -263,7 +264,7 @@ def main_worker(gpu, ngpus_per_node, args):
     # create model
     print("=> creating model '{}'".format(args.arch))
     model = builder.MoCo(
-        models.__dict__[args.arch],
+        ssl_encoder,
         args.moco_dim,
         args.moco_k,
         args.moco_m,
