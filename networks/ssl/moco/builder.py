@@ -26,20 +26,18 @@ class MoCo(nn.Module):
         self.K = K
         self.m = m
         self.T = T
-
+        self.use_mlp = mlp
         # create the encoders
         # num_classes is the output fc dimension
         # TODO: 1 radar frame --> multiple images; radar = query, images = keys
         self.encoder_q = base_encoder()
         self.encoder_k = base_encoder()
 
-        if mlp:  # hack: brute-force replacement
-            dim_mlp = self.encoder_q.fc.weight.shape[1]
-            self.encoder_q.fc = nn.Sequential(
-                nn.Linear(dim_mlp, dim_mlp), nn.ReLU(), self.encoder_q.fc
-            )
-            self.encoder_k.fc = nn.Sequential(
-                nn.Linear(dim_mlp, dim_mlp), nn.ReLU(), self.encoder_k.fc
+        if self.use_mlp:  # hack: brute-force replacement
+            # TODO: fix the dim_mlp calculation when using mlp for ViT
+            dim_mlp = 327680
+            self.mlp = nn.Sequential(
+                nn.Linear(dim_mlp, dim), nn.ReLU()
             )
 
         for param_q, param_k in zip(
@@ -138,6 +136,9 @@ class MoCo(nn.Module):
 
         # compute query features
         q = self.encoder_q(im_q)  # queries: NxC
+        q = torch.reshape(q, (q.shape[0], -1))  # TODO: move this into the self.mlp?
+        if self.use_mlp:
+            q = self.mlp(q)
         q = nn.functional.normalize(q, dim=1)
 
         # compute key features
@@ -148,6 +149,10 @@ class MoCo(nn.Module):
             im_k, idx_unshuffle = self._batch_shuffle_ddp(im_k)
 
             k = self.encoder_k(im_k)  # keys: NxC
+            # TODO: the order of reshape and mlp?
+            k = torch.reshape(k, (k.shape[0], -1))  # TODO: move this into the self.mlp?
+            if self.use_mlp:  # TODO: k and q are using the same one mlp here, however, the one in k is not update due to torch.no_grad()
+                k = self.mlp(k)
             k = nn.functional.normalize(k, dim=1)
 
             # undo shuffle

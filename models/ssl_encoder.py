@@ -53,6 +53,6 @@ if __name__ == '__main__':
     data_loader = CRUW_dataloader('./datasets/CRUW', batch_size=1, image_transform=image_transform(), radar_frames_transform=radar_transform())
     with torch.no_grad():
         for i, (images, radar_frames) in enumerate(data_loader):
-            # img_output = vision_encoder(images)
-            radar_output = vision_encoder(radar_frames.to(dtype=torch.float32))
-            # print(img_output.shape)
+            img_output = vision_encoder(images)
+            # radar_output = vision_encoder(radar_frames.to(dtype=torch.float32))
+            print(img_output.shape)
