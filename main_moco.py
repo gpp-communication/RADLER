@@ -117,7 +117,7 @@ parser.add_argument(
 )
 parser.add_argument(
     "--checkpoints-dir",
-    default='../logs/checkpoints/ssl',
+    default='./logs/checkpoints/ssl',
     type=str,
     help="folder path to save checkpoints"
 )
