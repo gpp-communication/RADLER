@@ -71,6 +71,11 @@ class MoCo(nn.Module):
         ):
             param_k.data = param_k.data * self.m + param_q.data * (1.0 - self.m)
 
+        for param_q, param_k in zip(
+                self.mlp_q.parameters(), self.mlp_k.parameters()
+        ):
+            param_k.data = param_k.data * self.m + param_q.data * (1.0 - self.m)
+
     @torch.no_grad()
     def _dequeue_and_enqueue(self, keys):
         # gather keys before updating queue
