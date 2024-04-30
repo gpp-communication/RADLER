@@ -36,7 +36,10 @@ class MoCo(nn.Module):
         if self.use_mlp:  # hack: brute-force replacement
             # TODO: fix the dim_mlp calculation when using mlp for ViT
             dim_mlp = 327680
-            self.mlp = nn.Sequential(
+            self.mlp_q = nn.Sequential(
+                nn.Linear(dim_mlp, dim), nn.ReLU()
+            )
+            self.mlp_k = nn.Sequential(
                 nn.Linear(dim_mlp, dim), nn.ReLU()
             )
 
@@ -45,6 +48,12 @@ class MoCo(nn.Module):
         ):
             param_k.data.copy_(param_q.data)  # initialize
             param_k.requires_grad = False  # not update by gradient
+
+        for param_q, param_k in zip(
+            self.mlp_q.parameters(), self.mlp_k.parameters()
+        ):
+            param_k.data.copy_(param_q.data)
+            param_k.requires_grad = False
 
         # create the queue
         self.register_buffer("queue", torch.randn(dim, K))
@@ -138,7 +147,7 @@ class MoCo(nn.Module):
         q = self.encoder_q(im_q)  # queries: NxC
         q = torch.reshape(q, (q.shape[0], -1))  # TODO: move this into the self.mlp?
         if self.use_mlp:
-            q = self.mlp(q)
+            q = self.mlp_q(q)
         q = nn.functional.normalize(q, dim=1)
 
         # compute key features
@@ -149,10 +158,9 @@ class MoCo(nn.Module):
             im_k, idx_unshuffle = self._batch_shuffle_ddp(im_k)
 
             k = self.encoder_k(im_k)  # keys: NxC
-            # TODO: the order of reshape and mlp?
             k = torch.reshape(k, (k.shape[0], -1))  # TODO: move this into the self.mlp?
             if self.use_mlp:  # TODO: k and q are using the same one mlp here, however, the one in k is not update due to torch.no_grad()
-                k = self.mlp(k)
+                k = self.mlp_k(k)
             k = nn.functional.normalize(k, dim=1)
 
             # undo shuffle
