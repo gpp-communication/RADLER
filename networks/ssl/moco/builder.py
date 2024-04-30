@@ -37,10 +37,10 @@ class MoCo(nn.Module):
             # TODO: fix the dim_mlp calculation when using mlp for ViT
             dim_mlp = 327680
             self.mlp_q = nn.Sequential(
-                nn.Linear(dim_mlp, dim), nn.ReLU()
+                nn.Flatten(), nn.Linear(dim_mlp, dim), nn.ReLU()
             )
             self.mlp_k = nn.Sequential(
-                nn.Linear(dim_mlp, dim), nn.ReLU()
+                nn.Flatten(), nn.Linear(dim_mlp, dim), nn.ReLU()
             )
 
         for param_q, param_k in zip(
@@ -150,7 +150,6 @@ class MoCo(nn.Module):
 
         # compute query features
         q = self.encoder_q(im_q)  # queries: NxC
-        q = torch.reshape(q, (q.shape[0], -1))  # TODO: move this into the self.mlp?
         if self.use_mlp:
             q = self.mlp_q(q)
         q = nn.functional.normalize(q, dim=1)
@@ -163,8 +162,7 @@ class MoCo(nn.Module):
             im_k, idx_unshuffle = self._batch_shuffle_ddp(im_k)
 
             k = self.encoder_k(im_k)  # keys: NxC
-            k = torch.reshape(k, (k.shape[0], -1))  # TODO: move this into the self.mlp?
-            if self.use_mlp:  # TODO: k and q are using the same one mlp here, however, the one in k is not update due to torch.no_grad()
+            if self.use_mlp:
                 k = self.mlp_k(k)
             k = nn.functional.normalize(k, dim=1)
 
