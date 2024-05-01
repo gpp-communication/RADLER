@@ -14,7 +14,7 @@ class MoCo(nn.Module):
     https://arxiv.org/abs/1911.05722
     """
 
-    def __init__(self, base_encoder, dim=128, K=65536, m=0.999, T=0.07, mlp=False):
+    def __init__(self, base_encoder, dim=128, K=65536, m=0.999, T=0.07):
         """
         dim: feature dimension (default: 128)
         K: queue size; number of negative keys (default: 65536)
@@ -26,22 +26,20 @@ class MoCo(nn.Module):
         self.K = K
         self.m = m
         self.T = T
-        self.use_mlp = mlp
         # create the encoders
         # num_classes is the output fc dimension
         # TODO: 1 radar frame --> multiple images; radar = query, images = keys
         self.encoder_q = base_encoder()
         self.encoder_k = base_encoder()
 
-        if self.use_mlp:  # hack: brute-force replacement
-            # TODO: fix the dim_mlp calculation when using mlp for ViT
-            dim_mlp = 327680
-            self.mlp_q = nn.Sequential(
-                nn.Linear(dim_mlp, dim), nn.ReLU()
-            )
-            self.mlp_k = nn.Sequential(
-                nn.Linear(dim_mlp, dim), nn.ReLU()
-            )
+        # TODO: fix the dim_mlp calculation when using mlp for ViT
+        dim_mlp = 327680
+        self.mlp_q = nn.Sequential(
+            nn.Flatten(), nn.Linear(dim_mlp, dim), nn.ReLU()
+        )
+        self.mlp_k = nn.Sequential(
+            nn.Flatten(), nn.Linear(dim_mlp, dim), nn.ReLU()
+        )
 
         for param_q, param_k in zip(
                 self.encoder_q.parameters(), self.encoder_k.parameters()
@@ -68,6 +66,11 @@ class MoCo(nn.Module):
         """
         for param_q, param_k in zip(
                 self.encoder_q.parameters(), self.encoder_k.parameters()
+        ):
+            param_k.data = param_k.data * self.m + param_q.data * (1.0 - self.m)
+
+        for param_q, param_k in zip(
+                self.mlp_q.parameters(), self.mlp_k.parameters()
         ):
             param_k.data = param_k.data * self.m + param_q.data * (1.0 - self.m)
 
@@ -145,9 +148,7 @@ class MoCo(nn.Module):
 
         # compute query features
         q = self.encoder_q(im_q)  # queries: NxC
-        q = torch.reshape(q, (q.shape[0], -1))  # TODO: move this into the self.mlp?
-        if self.use_mlp:
-            q = self.mlp_q(q)
+        q = self.mlp_q(q)
         q = nn.functional.normalize(q, dim=1)
 
         # compute key features
@@ -158,9 +159,7 @@ class MoCo(nn.Module):
             im_k, idx_unshuffle = self._batch_shuffle_ddp(im_k)
 
             k = self.encoder_k(im_k)  # keys: NxC
-            k = torch.reshape(k, (k.shape[0], -1))  # TODO: move this into the self.mlp?
-            if self.use_mlp:  # TODO: k and q are using the same one mlp here, however, the one in k is not update due to torch.no_grad()
-                k = self.mlp_k(k)
+            k = self.mlp_k(k)
             k = nn.functional.normalize(k, dim=1)
 
             # undo shuffle
