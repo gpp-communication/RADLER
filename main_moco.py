@@ -34,23 +34,8 @@ import torchvision.models as models
 import torchvision.transforms as transforms
 
 
-model_names = sorted(
-    name
-    for name in models.__dict__
-    if name.islower() and not name.startswith("__") and callable(models.__dict__[name])
-)
-
-parser = argparse.ArgumentParser(description="PyTorch ImageNet Training")
+parser = argparse.ArgumentParser(description="PyTorch SSL Training with Camera Images and Radar Range-Azimuth Maps")
 parser.add_argument("data", metavar="DIR", help="path to dataset")
-# TODO: delete this argument later
-parser.add_argument(
-    "-a",
-    "--arch",
-    metavar="ARCH",
-    default="resnet50",
-    choices=model_names,
-    help="model architecture: " + " | ".join(model_names) + " (default: resnet50)",
-)
 parser.add_argument(
     "-j",
     "--workers",
@@ -179,14 +164,6 @@ parser.add_argument(
     "--moco-t", default=0.07, type=float, help="softmax temperature (default: 0.07)"
 )
 
-# options for moco v2
-# TODO: these can be removed, but safely
-parser.add_argument("--mlp", action="store_true", help="use mlp head")
-parser.add_argument(
-    "--aug-plus", action="store_true", help="use moco v2 data augmentation"
-)
-parser.add_argument("--cos", action="store_true", help="use cosine lr schedule")
-
 
 def main():
     args = parser.parse_args()
@@ -263,14 +240,13 @@ def main_worker(gpu, ngpus_per_node, args):
         )
 
     # create model
-    print("=> creating model '{}'".format(args.arch))
+    print("=> creating model '{}'".format('ViT'))
     model = builder.MoCo(
         SSLEncoder,
         args.moco_dim,
         args.moco_k,
         args.moco_m,
         args.moco_t,
-        args.mlp,
     )
     # print(model)
 
@@ -338,39 +314,8 @@ def main_worker(gpu, ngpus_per_node, args):
     cudnn.benchmark = True
 
     # Data loading code
-    traindir = os.path.join(args.data, "train")
-    normalize = transforms.Normalize(
-        mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
-    )
-    if args.aug_plus:
-        # MoCo v2's aug: similar to SimCLR https://arxiv.org/abs/2002.05709
-        augmentation = [
-            transforms.RandomResizedCrop(224, scale=(0.2, 1.0)),
-            transforms.RandomApply(
-                [transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8  # not strengthened
-            ),
-            transforms.RandomGrayscale(p=0.2),
-            transforms.RandomApply([loader.GaussianBlur([0.1, 2.0])], p=0.5),
-            transforms.RandomHorizontalFlip(),
-            transforms.ToTensor(),
-            normalize,
-        ]
-    else:
-        # MoCo v1's aug: the same as InstDisc https://arxiv.org/abs/1805.01978
-        augmentation = [
-            transforms.RandomResizedCrop(224, scale=(0.2, 1.0)),
-            transforms.RandomGrayscale(p=0.2),
-            transforms.ColorJitter(0.4, 0.4, 0.4, 0.4),
-            transforms.RandomHorizontalFlip(),
-            transforms.ToTensor(),
-            normalize,
-        ]
-
-    train_dataset = datasets.ImageFolder(
-        traindir, loader.TwoCropsTransform(transforms.Compose(augmentation))
-    )
-
-    train_dataset = CRUWDataset('./datasets/CRUW', img_transform=image_transform(), radar_transform=radar_transform())
+    traindir = os.path.join(args.data)
+    train_dataset = CRUWDataset(traindir, img_transform=image_transform(), radar_transform=radar_transform())
 
     if args.distributed:
         train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
@@ -401,7 +346,7 @@ def main_worker(gpu, ngpus_per_node, args):
             save_checkpoint(
                 {
                     "epoch": epoch + 1,
-                    "arch": args.arch,
+                    "arch": "ViT",
                     "state_dict": model.state_dict(),
                     "optimizer": optimizer.state_dict(),
                 },
@@ -510,11 +455,8 @@ class ProgressMeter:
 def adjust_learning_rate(optimizer, epoch, args):
     """Decay the learning rate based on schedule"""
     lr = args.lr
-    if args.cos:  # cosine lr schedule
-        lr *= 0.5 * (1.0 + math.cos(math.pi * epoch / args.epochs))
-    else:  # stepwise lr schedule
-        for milestone in args.schedule:
-            lr *= 0.1 if epoch >= milestone else 1.0
+    for milestone in args.schedule:
+        lr *= 0.1 if epoch >= milestone else 1.0
     for param_group in optimizer.param_groups:
         param_group["lr"] = lr
 
