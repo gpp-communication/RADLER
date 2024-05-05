@@ -362,9 +362,13 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
     losses = AverageMeter("Loss", ":.4e")
     top1 = AverageMeter("Acc@1", ":6.2f")
     top5 = AverageMeter("Acc@5", ":6.2f")
+    train_log = os.path.join(args.checkpoints_dir, "train.log")
+    with open(train_log, 'w'):
+        pass
     progress = ProgressMeter(
         len(train_loader),
         [batch_time, data_time, losses, top1, top5],
+        train_log,
         prefix="Epoch: [{}]".format(epoch),
     )
 
@@ -436,15 +440,19 @@ class AverageMeter:
 
 
 class ProgressMeter:
-    def __init__(self, num_batches, meters, prefix=""):
+    def __init__(self, num_batches, meters, train_log, prefix=""):
         self.batch_fmtstr = self._get_batch_fmtstr(num_batches)
         self.meters = meters
+        self.train_log = train_log
         self.prefix = prefix
 
     def display(self, batch):
         entries = [self.prefix + self.batch_fmtstr.format(batch)]
         entries += [str(meter) for meter in self.meters]
         print("\t".join(entries))
+        with open(self.train_log, 'a+') as f_log:
+            f_log.write("\t".join(entries))
+            f_log.write("\n")
 
     def _get_batch_fmtstr(self, num_batches):
         num_digits = len(str(num_batches // 1))
