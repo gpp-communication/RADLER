@@ -249,6 +249,7 @@ def main_worker(gpu, ngpus_per_node, args):
         args.moco_t,
     )
     # print(model)
+    print(model.get_submodule('encoder_q'))
 
     if args.distributed:
         # For multiprocessing distributed, DistributedDataParallel constructor
