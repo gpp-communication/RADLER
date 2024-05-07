@@ -249,7 +249,7 @@ def main_worker(gpu, ngpus_per_node, args):
         args.moco_t,
     )
     # print(model)
-    print(model.get_submodule('encoder_q'))
+    # print(model.get_submodule('encoder_q'))
 
     if args.distributed:
         # For multiprocessing distributed, DistributedDataParallel constructor
@@ -333,6 +333,9 @@ def main_worker(gpu, ngpus_per_node, args):
         drop_last=True,
     )
 
+    with open(os.path.join(args.checkpoints_dir, "train.log"), 'w'):
+        pass
+
     for epoch in range(args.start_epoch, args.epochs):
         if args.distributed:
             train_sampler.set_epoch(epoch)
@@ -363,13 +366,10 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
     losses = AverageMeter("Loss", ":.4e")
     top1 = AverageMeter("Acc@1", ":6.2f")
     top5 = AverageMeter("Acc@5", ":6.2f")
-    train_log = os.path.join(args.checkpoints_dir, "train.log")
-    with open(train_log, 'w'):
-        pass
     progress = ProgressMeter(
         len(train_loader),
         [batch_time, data_time, losses, top1, top5],
-        train_log,
+        os.path.join(args.checkpoints_dir, "train.log"),
         prefix="Epoch: [{}]".format(epoch),
     )
 
