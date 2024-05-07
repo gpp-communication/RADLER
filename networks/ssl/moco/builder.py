@@ -149,6 +149,7 @@ class MoCo(nn.Module):
         # compute query features
         q = self.encoder_q(im_q)  # queries: NxC
         q = self.mlp_q(q)
+        q = q.contiguous()
         q = nn.functional.normalize(q, dim=1)
 
         # compute key features
@@ -160,6 +161,7 @@ class MoCo(nn.Module):
 
             k = self.encoder_k(im_k)  # keys: NxC
             k = self.mlp_k(k)
+            k = k.contiguous()
             k = nn.functional.normalize(k, dim=1)
 
             # undo shuffle
