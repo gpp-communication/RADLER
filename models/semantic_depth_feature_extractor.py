@@ -7,9 +7,15 @@ class SemanticDepthFeatureExtractor(nn.Module):
     def __init__(self):
         super().__init__()
         self.backbone = nn.Sequential(*(list(torchvision.models.resnet18().children())[:-1]))
+        self.ln = nn.Linear(512, 256)
 
     def forward(self, x):
-        return self.backbone(x)
+        x = self.backbone(x)
+        x = torch.squeeze(x, (2, 3))  # pytorch >= 2.0
+        x = self.ln(x)
+        x = torch.reshape(x, (x.shape[0], 16, 16))
+        x = torch.unsqueeze(x, dim=1)
+        return x
 
 
 if __name__ == '__main__':
