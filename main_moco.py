@@ -249,6 +249,7 @@ def main_worker(gpu, ngpus_per_node, args):
         args.moco_t,
     )
     # print(model)
+    # print(model.get_submodule('encoder_q'))
 
     if args.distributed:
         # For multiprocessing distributed, DistributedDataParallel constructor
@@ -332,6 +333,9 @@ def main_worker(gpu, ngpus_per_node, args):
         drop_last=True,
     )
 
+    with open(os.path.join(args.checkpoints_dir, "train.log"), 'w'):
+        pass
+
     for epoch in range(args.start_epoch, args.epochs):
         if args.distributed:
             train_sampler.set_epoch(epoch)
@@ -365,6 +369,7 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
     progress = ProgressMeter(
         len(train_loader),
         [batch_time, data_time, losses, top1, top5],
+        os.path.join(args.checkpoints_dir, "train.log"),
         prefix="Epoch: [{}]".format(epoch),
     )
 
@@ -436,15 +441,19 @@ class AverageMeter:
 
 
 class ProgressMeter:
-    def __init__(self, num_batches, meters, prefix=""):
+    def __init__(self, num_batches, meters, train_log, prefix=""):
         self.batch_fmtstr = self._get_batch_fmtstr(num_batches)
         self.meters = meters
+        self.train_log = train_log
         self.prefix = prefix
 
     def display(self, batch):
         entries = [self.prefix + self.batch_fmtstr.format(batch)]
         entries += [str(meter) for meter in self.meters]
         print("\t".join(entries))
+        with open(self.train_log, 'a+') as f_log:
+            f_log.write("\t".join(entries))
+            f_log.write("\n")
 
     def _get_batch_fmtstr(self, num_batches):
         num_digits = len(str(num_batches // 1))
