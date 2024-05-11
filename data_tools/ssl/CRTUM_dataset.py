@@ -1,7 +1,6 @@
 import os
 import numpy as np
 import pandas as pd
-import scipy.io as sio
 from PIL import Image
 from torch.utils.data import Dataset
 
@@ -30,16 +29,14 @@ class CRTUMDataset(Dataset):
         img_path = self.df['images'][idx]
         radar_path = self.df['radar_frames'][idx]
         image = Image.open(img_path).convert('RGB')  # TODO: check the RGB order in Image
-        radar = sio.loadmat(radar_path)  # TODO: make sure the radar frames are stored in mat format
-        radar = radar['data']  # TODO: replace the placeholder key with the correct key
+        radar = np.load(radar_path)
         if self.image_transform is not None:
             image = self.image_transform(image)  # TODO: to tensor
         if self.radar_transform is not None:
             radar = self.radar_transform(radar)  # TODO: to tensor
-        return image, radar
+        return image, radar.to(dtype=torch.float32)
 
 
 if __name__ == '__main__':
-    dataset = CRTUMDataset('/Users/chengxuyuan/Downloads/ROD2021/sequences/train_test')
-    print(dataset.df)
+    dataset = CRTUMDataset('../../datasets/CRTUM/data_cluster_1_2/pretext')
     print(len(dataset))
