@@ -8,10 +8,11 @@ class SemanticDepthFeatureExtractor(nn.Module):
         super().__init__()
         self.backbone = nn.Sequential(*(list(torchvision.models.resnet18().children())[:-1]))
         self.ln = nn.Linear(512, 256)
+        assert torch.__version__.split('.')[0] == '2', "Pytorch version has to be greater than or equal to 2.0"
 
     def forward(self, x):
         x = self.backbone(x)
-        x = torch.squeeze(x, (2, 3))  # pytorch >= 2.0
+        x = torch.squeeze(x, (2, 3))
         x = self.ln(x)
         x = torch.reshape(x, (x.shape[0], 16, 16))
         x = torch.unsqueeze(x, dim=1)
