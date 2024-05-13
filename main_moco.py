@@ -450,7 +450,6 @@ class ProgressMeter:
     def display(self, batch):
         entries = [self.prefix + self.batch_fmtstr.format(batch)]
         entries += [str(meter) for meter in self.meters]
-        print("\t".join(entries))
         with open(self.train_log, 'a+') as f_log:
             f_log.write("\t".join(entries))
             f_log.write("\n")
