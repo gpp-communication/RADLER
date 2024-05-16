@@ -24,6 +24,7 @@ class RODDecoder(nn.Module):
         x = self.prelu(self.convt2(x))  # (B, 128, 32, 32) -> (B, 64, 64, 64)
         x = self.prelu(self.convt3(x))  # (B, 64, 64, 64) -> (B, 3, 128, 128)
         x = self.convt4(x)  # (B, 3, 128, 128) -> (B, 3, 224, 221)
+        x = self.sigmoid(x)
         return x
 
 
