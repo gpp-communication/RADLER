@@ -1,2 +1,2 @@
 # Radio-Vision-CityGML
-RVC: Self-supervised Radio-Vision Contrastive Learning for Radar Object Detection with A-priori Information from CityGML
+Self-Supervised Radar-Image Learning for 6G Sensing with Prior Information from Semantic 3D City Models

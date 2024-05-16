@@ -8,7 +8,6 @@
 
 import argparse
 import builtins
-import math
 import os
 import random
 import shutil
@@ -17,7 +16,6 @@ import warnings
 import subprocess
 
 import networks.ssl.moco.builder as builder
-import networks.ssl.moco.loader as loader
 from models.ssl_encoder import SSLEncoder, image_transform, radar_transform
 from data_tools.ssl.CRUW_dataset import CRUWDataset
 import torch
@@ -29,9 +27,6 @@ import torch.nn.parallel
 import torch.optim
 import torch.utils.data
 import torch.utils.data.distributed
-import torchvision.datasets as datasets
-import torchvision.models as models
-import torchvision.transforms as transforms
 
 
 parser = argparse.ArgumentParser(description="PyTorch SSL Training with Camera Images and Radar Range-Azimuth Maps")
