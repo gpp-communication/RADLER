@@ -1,10 +1,7 @@
 import torch
-import requests
 import torchvision
-import numpy as np
 import torch.nn as nn
 import torchvision.transforms as transforms
-from PIL import Image
 from torch.utils.data import DataLoader
 from torchvision.models import ViT_H_14_Weights
 from torchvision.models.feature_extraction import create_feature_extractor
@@ -37,8 +34,9 @@ def radar_transform():
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])
 
+
 def CRUW_dataloader(root, batch_size, num_workers=4, image_transform=None,
-                     radar_frames_transform=None, pin_memory=True):
+                    radar_frames_transform=None, pin_memory=True):
     dataset = CRUWDataset(root, image_transform, radar_frames_transform)
     dataloader = DataLoader(
         dataset=dataset,
@@ -48,9 +46,11 @@ def CRUW_dataloader(root, batch_size, num_workers=4, image_transform=None,
     )
     return dataloader
 
+
 if __name__ == '__main__':
     vision_encoder = SSLEncoder()
-    data_loader = CRUW_dataloader('./datasets/CRUW', batch_size=1, image_transform=image_transform(), radar_frames_transform=radar_transform())
+    data_loader = CRUW_dataloader('./datasets/CRUW', batch_size=1, image_transform=image_transform(),
+                                  radar_frames_transform=radar_transform())
     with torch.no_grad():
         for i, (images, radar_frames) in enumerate(data_loader):
             img_output = vision_encoder(images)
