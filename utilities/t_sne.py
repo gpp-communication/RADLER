@@ -44,7 +44,8 @@ if __name__ == '__main__':
     radar_data = load_radar_data(radar_paths)
     encoder = pretrained_encoder('/Users/yluo/Downloads/checkpoint_0019.pth.tar')
     encoder.eval()
-    output = encoder(torch.from_numpy(radar_data).to(torch.float32))
+    with torch.no_grad():
+        output = encoder(torch.from_numpy(radar_data).to(torch.float32))
     output = output.detach().numpy()
     n_samples, nx, ny = output.shape
     output = np.reshape(output, (n_samples, nx*ny))
