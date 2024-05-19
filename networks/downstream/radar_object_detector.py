@@ -8,12 +8,26 @@ from models.ssl_encoder import SSLEncoder
 from models.semantic_depth_feature_extractor import SemanticDepthFeatureExtractor
 
 
+def filter_weights(state_dict: dict):
+    encoder_q_state_dict_old = {k: v for k, v in state_dict.items() if k.startswith('module.encoder_q.')}
+    encoder_q_state_dict_new = {}
+    for k, v in encoder_q_state_dict_old.items():
+        new_k = k.replace('module.encoder_q.', '')
+        encoder_q_state_dict_new[new_k] = encoder_q_state_dict_old[k]
+    del encoder_q_state_dict_old
+    return encoder_q_state_dict_new
+
+
 class RadarObjectDetector(nn.Module):
     def __init__(self, num_class=3, fuse_semantic_depth_feature=False):
         super(RadarObjectDetector, self).__init__()
         self.fuse_semantic_depth_feature = fuse_semantic_depth_feature
         self.encoder = SSLEncoder()
-        # self.encoder.load_state_dict(torch.load("models/ssl_encoder.pth"))  # TODO: load pretrained weights
+        # TODO: pass the weight as an argument, and correct the device
+        pretrained_weights = torch.load('/Users/yluo/Downloads/checkpoint_0019.pth.tar',
+                                        map_location=torch.device('cpu'))
+        self.encoder.load_state_dict(filter_weights(pretrained_weights['state_dict']))
+        del pretrained_weights
         self.decoder = RODDecoder(num_class)
         if self.fuse_semantic_depth_feature:
             self.semantic_depth_feature_extractor = SemanticDepthFeatureExtractor()
