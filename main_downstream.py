@@ -22,8 +22,6 @@ import torch.nn.parallel
 import torch.optim
 import torch.utils.data
 import torch.utils.data.distributed
-import torchvision.datasets as datasets
-import torchvision.transforms as transforms
 
 from networks.downstream import RadarObjectDetector
 from data_tools.downstream import DownstreamDataset
@@ -100,11 +98,11 @@ parser.add_argument(
     help="path to latest checkpoint (default: none)",
 )
 parser.add_argument(
-    "-e",
-    "--evaluate",
-    dest="evaluate",
+    "-t",
+    "--test",
+    dest="test",
     action="store_true",
-    help="evaluate model on validation set",
+    help="evaluate model on test set",
 )
 parser.add_argument(
     "--world-size",
@@ -135,10 +133,6 @@ parser.add_argument(
          "N processes per node, which has N GPUs. This is the "
          "fastest way to use PyTorch for either single node or "
          "multi node data parallel training",
-)
-
-parser.add_argument(
-    "--pretrained", default="", type=str, help="path to pretrained checkpoint"
 )
 
 best_acc1 = 0
@@ -276,7 +270,8 @@ def main_worker(gpu, ngpus_per_node, args):
     cudnn.benchmark = True
 
     # Data loading code
-    train_dataset = DownstreamDataset('./datasets/CRTUM/data_cluster_1_2/downstream/train')
+    train_dataset_dir = os.path.join(args.data_dir, "train")
+    train_dataset = DownstreamDataset(train_dataset_dir)
 
     if args.distributed:
         train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
@@ -292,8 +287,9 @@ def main_worker(gpu, ngpus_per_node, args):
         sampler=train_sampler,
     )
 
+    test_dataset_dir = os.path.join(args.data_dir, "test")
     test_loader = torch.utils.data.DataLoader(
-        DownstreamDataset('./datasets/CRTUM/data_cluster_1_2/downstream/test'),
+        DownstreamDataset(test_dataset_dir),
         batch_size=args.batch_size,
         shuffle=False,
         num_workers=args.workers,
@@ -312,7 +308,7 @@ def main_worker(gpu, ngpus_per_node, args):
         # train for one epoch
         train(train_loader, model, criterion, optimizer, epoch, args)
 
-        # evaluate on validation set
+        # evaluate on test set
         acc1 = test(test_loader, model, criterion, args)
 
         # remember best acc@1 and save checkpoint
@@ -387,13 +383,13 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
             progress.display(i)
 
 
-def test(val_loader, model, criterion, args):
+def test(test_loader, model, criterion, args):
     batch_time = AverageMeter("Time", ":6.3f")
     losses = AverageMeter("Loss", ":.4e")
     top1 = AverageMeter("Acc@1", ":6.2f")
     top5 = AverageMeter("Acc@5", ":6.2f")
     progress = ProgressMeter(
-        len(val_loader), [batch_time, losses, top1, top5], prefix="Test: "
+        len(test_loader), [batch_time, losses, top1, top5], prefix="Test: "
     )
 
     # switch to evaluate mode
@@ -401,7 +397,7 @@ def test(val_loader, model, criterion, args):
 
     with torch.no_grad():
         end = time.time()
-        for i, (images, target) in enumerate(val_loader):
+        for i, (images, target) in enumerate(test_loader):
             if args.gpu is not None:
                 images = images.cuda(args.gpu, non_blocking=True)
             target = target.cuda(args.gpu, non_blocking=True)
