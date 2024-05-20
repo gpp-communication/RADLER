@@ -102,6 +102,11 @@ parser.add_argument(
     help="folder path to save checkpoints"
 )
 parser.add_argument(
+    "--save-latest-checkpoint",
+    action='store_true',
+    help="whether to always save the checkpoint of the latest epoch or to save the checkpoints of all epochs"
+)
+parser.add_argument(
     "--resume",
     default="",
     type=str,
@@ -343,6 +348,10 @@ def main_worker(gpu, ngpus_per_node, args):
         if not args.multiprocessing_distributed or (
             args.multiprocessing_distributed and args.rank % ngpus_per_node == 0
         ):
+            if args.save_latest_checkpoint:
+                filename = "checkpoint_latest.pth.tar"
+            else:
+                filename = "checkpoint_{:04d}.pth.tar".format(epoch)
             save_checkpoint(
                 {
                     "epoch": epoch + 1,
@@ -352,7 +361,7 @@ def main_worker(gpu, ngpus_per_node, args):
                 },
                 is_best=False,
                 checkpoints_dir=args.checkpoints_dir,
-                filename="checkpoint_{:04d}.pth.tar".format(epoch),
+                filename=filename,
             )
 
 
