@@ -26,22 +26,8 @@ import torchvision.datasets as datasets
 import torchvision.models as models
 import torchvision.transforms as transforms
 
-model_names = sorted(
-    name
-    for name in models.__dict__
-    if name.islower() and not name.startswith("__") and callable(models.__dict__[name])
-)
-
-parser = argparse.ArgumentParser(description="PyTorch ImageNet Training")
+parser = argparse.ArgumentParser(description="PyTorch Radar Object Detection Training with Semantic Depth Tensor")
 parser.add_argument("data", metavar="DIR", help="path to dataset")
-parser.add_argument(
-    "-a",
-    "--arch",
-    metavar="ARCH",
-    default="resnet50",
-    choices=model_names,
-    help="model architecture: " + " | ".join(model_names) + " (default: resnet50)",
-)
 parser.add_argument(
     "-j",
     "--workers",
@@ -129,7 +115,7 @@ parser.add_argument(
 )
 parser.add_argument(
     "--dist-url",
-    default="tcp://224.66.41.62:23456",
+    default="env://",
     type=str,
     help="url used to set up distributed training",
 )
@@ -150,7 +136,7 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "--pretrained", default="", type=str, help="path to moco pretrained checkpoint"
+    "--pretrained", default="", type=str, help="path to pretrained checkpoint"
 )
 
 best_acc1 = 0
