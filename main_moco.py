@@ -405,6 +405,7 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
 
 
 def save_checkpoint(state, is_best, checkpoints_dir, filename="checkpoint.pth.tar"):
+    os.makedirs(checkpoints_dir, exist_ok=True)
     torch.save(state, os.path.join(checkpoints_dir, filename))
     if is_best:
         shutil.copyfile(os.path.join(checkpoints_dir, filename), os.path.join(checkpoints_dir, "model_best.pth.tar"))
