@@ -13,8 +13,7 @@ class SSLEncoder(nn.Module):
     def __init__(self, image_size=224):
         super(SSLEncoder, self).__init__()
         self.patch_size = 14
-        # TODO: Add pretrained weights
-        self.feature_extractor = create_feature_extractor(torchvision.models.vit_h_14(),
+        self.feature_extractor = create_feature_extractor(torchvision.models.vit_h_14(weights=ViT_H_14_Weights),
                                                           return_nodes={"encoder.ln": "features"})
 
     def forward(self, image):
