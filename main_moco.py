@@ -97,7 +97,7 @@ parser.add_argument(
 )
 parser.add_argument(
     "--checkpoints-dir",
-    default=None,
+    default='./logs/checkpoints/ssl',
     type=str,
     help="folder path to save checkpoints"
 )
@@ -333,9 +333,8 @@ def main_worker(gpu, ngpus_per_node, args):
         drop_last=True,
     )
 
-    if args.checkpoints_dir is not None:
-        args.checkpoints_dir = os.path.join('./logs/checkpoints/ssl',
-                                            '-'.join(['', str(args.learning_rate), str(args.moco_k)]))
+    args.checkpoints_dir = os.path.join(args.checkpoints_dir,
+                                        '-'.join(['training', str(args.learning_rate), str(args.moco_k)]))
     os.makedirs(args.checkpoints_dir, exist_ok=True)
     with open(os.path.join(args.checkpoints_dir, "train.log"), 'w'):
         pass
