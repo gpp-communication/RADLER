@@ -102,9 +102,10 @@ parser.add_argument(
     help="folder path to save checkpoints"
 )
 parser.add_argument(
-    "--save-latest-checkpoint",
-    action='store_true',
-    help="whether to always save the checkpoint of the latest epoch or to save the checkpoints of all epochs"
+    "--save-frequency",
+    default='1',
+    type=int,
+    help="checkpoint file save frequency (default: 1)"
 )
 parser.add_argument(
     "--resume",
@@ -350,21 +351,30 @@ def main_worker(gpu, ngpus_per_node, args):
         if not args.multiprocessing_distributed or (
             args.multiprocessing_distributed and args.rank % ngpus_per_node == 0
         ):
-            if args.save_latest_checkpoint:
-                filename = "checkpoint_latest.pth.tar"
-            else:
-                filename = "checkpoint_{:04d}.pth.tar".format(epoch)
-            save_checkpoint(
-                {
-                    "epoch": epoch + 1,
-                    "arch": "ViT",
-                    "state_dict": model.state_dict(),
-                    "optimizer": optimizer.state_dict(),
-                },
-                is_best=False,
-                checkpoints_dir=args.checkpoints_dir,
-                filename=filename,
-            )
+            if args.save_frequency == 0:
+                save_checkpoint(
+                    {
+                        "epoch": epoch + 1,
+                        "arch": "ViT",
+                        "state_dict": model.state_dict(),
+                        "optimizer": optimizer.state_dict(),
+                    },
+                    is_best=False,
+                    checkpoints_dir=args.checkpoints_dir,
+                    filename="checkpoint_latest.pth.tar",
+                )
+            elif (epoch + 1) % args.save_frequency == 0:
+                save_checkpoint(
+                    {
+                        "epoch": epoch + 1,
+                        "arch": "ViT",
+                        "state_dict": model.state_dict(),
+                        "optimizer": optimizer.state_dict(),
+                    },
+                    is_best=False,
+                    checkpoints_dir=args.checkpoints_dir,
+                    filename="checkpoint_{:04d}.pth.tar".format(epoch),
+                )
 
 
 def train(train_loader, model, criterion, optimizer, epoch, args):
