@@ -1,5 +1,6 @@
-import numpy as np
 import torch
+import argparse
+import numpy as np
 import torch.nn as nn
 from einops.layers.torch import Rearrange
 
@@ -7,10 +8,13 @@ from models.radio_decoder import RODDecoder
 from models.ssl_encoder import SSLEncoder
 from models.semantic_depth_feature_extractor import SemanticDepthFeatureExtractor
 
+parser = argparse.ArgumentParser(description='Radar Object Detection')
+parser.add_argument('--pretrained-model', type=str, default='')
 
-def pretrained_encoder(checkpoint_path):
+
+def pretrained_encoder(pretrained_model):
     encoder_q = SSLEncoder()
-    pretrained_weights = torch.load(checkpoint_path, map_location=torch.device('cpu'))
+    pretrained_weights = torch.load(pretrained_model, map_location=torch.device('cpu'))
     state_dict = pretrained_weights['state_dict']
     encoder_q_state_dict_old = {k: v for k, v in state_dict.items() if k.startswith('module.encoder_q.')}
     encoder_q_state_dict_new = {}
@@ -24,10 +28,10 @@ def pretrained_encoder(checkpoint_path):
 
 
 class RadarObjectDetector(nn.Module):
-    def __init__(self, num_class=3, fuse_semantic_depth_feature=False):
+    def __init__(self, pretrained_model, num_class=3, fuse_semantic_depth_feature=False):
         super(RadarObjectDetector, self).__init__()
         self.fuse_semantic_depth_feature = fuse_semantic_depth_feature
-        self.encoder = pretrained_encoder('/Users/yluo/Downloads/checkpoint_0019.pth.tar')
+        self.encoder = pretrained_encoder(pretrained_model)
         self.decoder = RODDecoder(num_class)
         if self.fuse_semantic_depth_feature:
             self.semantic_depth_feature_extractor = SemanticDepthFeatureExtractor()
@@ -51,7 +55,8 @@ class RadarObjectDetector(nn.Module):
 
 
 if __name__ == '__main__':
-    model = RadarObjectDetector(fuse_semantic_depth_feature=True)
+    args = parser.parse_args()
+    model = RadarObjectDetector(args.pretrained_model, fuse_semantic_depth_feature=True)
     test = torch.randn(1, 3, 224, 224)
     semantic_depth_tensor_test = np.load('../../models/semantic_depth.npy')
     semantic_depth_tensor_test = np.expand_dims(semantic_depth_tensor_test, 0)
