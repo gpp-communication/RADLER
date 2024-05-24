@@ -1,3 +1,5 @@
+import os
+
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
@@ -22,37 +24,21 @@ def load_radar_data(paths):
 
 
 if __name__ == '__main__':
-    radar_paths = [
-        '/Users/yluo/Pictures/CRTUM/data_cluster_1_2/downstream/Arcisstraße1/RADAR_RA_H/000008.npy',
-        '/Users/yluo/Pictures/CRTUM/data_cluster_1_2/downstream/Arcisstraße1/RADAR_RA_H/000009.npy',
-        '/Users/yluo/Pictures/CRTUM/data_cluster_1_2/downstream/Arcisstraße1/RADAR_RA_H/000018.npy',
-        '/Users/yluo/Pictures/CRTUM/data_cluster_1_2/downstream/Arcisstraße1/RADAR_RA_H/000019.npy',
-        '/Users/yluo/Pictures/CRTUM/data_cluster_1_2/downstream/Arcisstraße1/RADAR_RA_H/000020.npy',
-        '/Users/yluo/Pictures/CRTUM/data_cluster_1_2/downstream/Arcisstraße1/RADAR_RA_H/000021.npy',
-        '/Users/yluo/Pictures/CRTUM/data_cluster_1_2/downstream/Arcisstraße1/RADAR_RA_H/000023.npy',
-        '/Users/yluo/Pictures/CRTUM/data_cluster_1_2/downstream/Arcisstraße1/RADAR_RA_H/000024.npy',
-        '/Users/yluo/Pictures/CRTUM/data_cluster_1_2/downstream/Arcisstraße1/RADAR_RA_H/000025.npy',
-        '/Users/yluo/Pictures/CRTUM/data_cluster_1_2/downstream/Arcisstraße1/RADAR_RA_H/000026.npy',
-        '/Users/yluo/Pictures/CRTUM/data_cluster_1_2/downstream/Arcisstraße1/RADAR_RA_H/000027.npy',
-        '/Users/yluo/Pictures/CRTUM/data_cluster_1_2/downstream/Arcisstraße1/RADAR_RA_H/000030.npy',
-        '/Users/yluo/Pictures/CRTUM/data_cluster_1_2/downstream/Arcisstraße1/RADAR_RA_H/000031.npy',
-        '/Users/yluo/Pictures/CRTUM/data_cluster_1_2/downstream/Arcisstraße1/RADAR_RA_H/000032.npy',
-        '/Users/yluo/Pictures/CRTUM/data_cluster_1_2/downstream/Arcisstraße1/RADAR_RA_H/000033.npy',
-        '/Users/yluo/Pictures/CRTUM/data_cluster_1_2/downstream/Arcisstraße1/RADAR_RA_H/000034.npy',
-        '/Users/yluo/Pictures/CRTUM/data_cluster_1_2/downstream/Arcisstraße1/RADAR_RA_H/000035.npy'
-    ]
+    radar_paths = []
+    radar_folder_dir = '/Users/yluo/Pictures/test'
+    for root, dirs, files in os.walk(radar_folder_dir):
+        for file in files:
+            radar_paths.append(os.path.join(root, file))
     radar_data = load_radar_data(radar_paths)
-    encoder = pretrained_encoder('/Users/yluo/Downloads/checkpoint_0019.pth.tar')
+    encoder = pretrained_encoder('/Users/yluo/Downloads/checkpoint_0059.pth.tar')
     encoder.eval()
     with torch.no_grad():
         output = encoder(torch.from_numpy(radar_data).to(torch.float32))
     output = output.detach().numpy()
     n_samples, nx, ny = output.shape
     output = np.reshape(output, (n_samples, nx*ny))
-    X_embedded = TSNE(n_components=2, perplexity=3).fit_transform(output)
+    X_embedded = TSNE(n_components=2, perplexity=10).fit_transform(output)
     print(X_embedded.shape)
     # plot samples in different group
-    plt.scatter(X_embedded[:3, 0], X_embedded[:3, 1])
-    plt.scatter(X_embedded[3:6, 0], X_embedded[3:6, 1])
-    plt.scatter(X_embedded[6:, 0], X_embedded[6:, 1])
+    plt.scatter(X_embedded[:, 0], X_embedded[:, 1])
     plt.show()
