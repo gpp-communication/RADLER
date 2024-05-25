@@ -56,7 +56,12 @@ class RadarObjectDetector(nn.Module):
 
 if __name__ == '__main__':
     args = parser.parse_args()
-    model = RadarObjectDetector(args.pretrained_model, fuse_semantic_depth_feature=True)
+    use_noise_channel = False
+    n_classes = 3
+    if not use_noise_channel:
+        model = RadarObjectDetector(args.pretrained_model, num_class=n_classes, fuse_semantic_depth_feature=True)
+    else:
+        model = RadarObjectDetector(args.pretrained_model, num_class=n_classes+1, fuse_semantic_depth_feature=True)
     test = torch.randn(1, 3, 224, 224)
     semantic_depth_tensor_test = np.load('../../models/semantic_depth.npy')
     semantic_depth_tensor_test = np.expand_dims(semantic_depth_tensor_test, 0)
