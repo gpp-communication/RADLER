@@ -1,9 +1,10 @@
-import torch
 import math
 import json
+import torch
 import numpy as np
 
 from networks.downstream.confidence_map import confmap2ra
+from networks.downstream.radar_object_detector import RadarObjectDetector
 
 
 def get_class_name(class_id, classes):
@@ -166,7 +167,12 @@ def post_process_single_frame(confmaps):
 
 
 if __name__ == '__main__':
-    test = np.random.uniform(0, 1, (3, 224, 221))
-    # test = test/np.linalg.norm(test) normalization?
-    results = post_process_single_frame(test)
+    test = torch.randn(1, 3, 224, 224)
+    model = RadarObjectDetector('/Users/yluo/Downloads/checkpoint_0059.pth.tar', fuse_semantic_depth_feature=False)
+    model.eval()
+    with torch.no_grad():
+        output = model(test)
+    output = torch.squeeze(output)
+    output = output.detach().cpu().numpy()
+    results = post_process_single_frame(output)
     print(results)
