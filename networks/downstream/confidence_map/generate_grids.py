@@ -4,7 +4,7 @@ import scipy
 import numpy as np
 
 
-def confmap2ra(name, radordeg='rad'):
+def confmap2ra(name, radar_configs, radordeg='rad'):
     """
     Map confidence map to range(m) and angle(deg): not uniformed angle
     :param radar_configs: radar configurations
@@ -13,9 +13,6 @@ def confmap2ra(name, radordeg='rad'):
     :return: mapping grids
     """
     # TODO: add more args for different network settings
-    with open('../config/radar_config.json') as f:
-        radar_configs = json.load(f)
-
     Fs = radar_configs['sample_freq']
     sweepSlope = radar_configs['sweep_slope']
     num_crop = radar_configs['crop_num']

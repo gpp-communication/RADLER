@@ -64,10 +64,10 @@ def normalize_confmap(confmap):
     return confmap_norm
 
 
-def add_noise_channel(confmap, radar_configs):
+def add_noise_channel(confmap, ramap_rsize, ramap_asize):
     n_class = 3
 
-    confmap_new = np.zeros((n_class + 1, radar_configs['ramap_rsize'], radar_configs['ramap_asize']), dtype=float)
+    confmap_new = np.zeros((n_class + 1, ramap_rsize, ramap_asize), dtype=float)
     confmap_new[:n_class, :, :] = confmap
     conf_max = np.max(confmap, axis=0)
     confmap_new[n_class, :, :] = 1.0 - conf_max
@@ -117,9 +117,9 @@ def generate_confmaps(metadata_dict, n_class, viz):
                 dtype=float)
             confmap_gt[-1, :, :] = 1.0  # initialize noise channal
         else:
-            confmap_gt = generate_confmap(n_obj, obj_info, object_config)
+            confmap_gt = generate_confmap(n_obj, obj_info, radar_configs, object_config)
             confmap_gt = normalize_confmap(confmap_gt)
-            confmap_gt = add_noise_channel(confmap_gt, radar_configs)
+            confmap_gt = add_noise_channel(confmap_gt, radar_configs['ramap_rsize'], radar_configs['ramap_asize'])
         assert confmap_gt.shape == (
             n_class + 1, radar_configs['ramap_rsize'], radar_configs['ramap_asize'])
         if viz:
@@ -129,18 +129,16 @@ def generate_confmaps(metadata_dict, n_class, viz):
     return confmaps
 
 
-def generate_confmap(n_obj, obj_info, config_dict, gaussian_thres=36):
+def generate_confmap(n_obj, obj_info, radar_configs, config_dict, gaussian_thres=36):
     n_class = 3
     classes = ['pedestrian', 'car', 'cyclist']  # TODO: check the order of the object classes in the array
-    ramap_rsize = 224
-    ramap_asize = 221
     confmap_sigmas = config_dict['confmap_cfg']['confmap_sigmas']
     confmap_sigmas_interval = config_dict['confmap_cfg']['confmap_sigmas_interval']
     confmap_length = config_dict['confmap_cfg']['confmap_length']
 
-    range_grid = confmap2ra('range')
+    range_grid = confmap2ra('range', radar_configs)
 
-    confmap = np.zeros((n_class, ramap_rsize, ramap_asize), dtype=float)
+    confmap = np.zeros((n_class, radar_configs['ramap_rsize'], radar_configs['ramap_asize']), dtype=float)
     for objid in range(n_obj):
         rng_idx = obj_info['center_ids'][objid][0]
         agl_idx = obj_info['center_ids'][objid][1]
@@ -155,8 +153,8 @@ def generate_confmap(n_obj, obj_info, config_dict, gaussian_thres=36):
             sigma = sigma_interval[1]
         if sigma < sigma_interval[0]:
             sigma = sigma_interval[0]
-        for i in range(ramap_rsize):
-            for j in range(ramap_asize):
+        for i in range(radar_configs['ramap_rsize']):
+            for j in range(radar_configs['ramap_asize']):
                 distant = (((rng_idx - i) * 2) ** 2 + (agl_idx - j) ** 2) / sigma ** 2
                 if distant < gaussian_thres:  # threshold for confidence maps
                     value = np.exp(- distant / 2) / (2 * math.pi)
