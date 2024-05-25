@@ -1,7 +1,7 @@
 import math
 import json
-import scipy
 import numpy as np
+import scipy.constants
 
 
 def confmap2ra(name, radar_configs, radordeg='rad'):

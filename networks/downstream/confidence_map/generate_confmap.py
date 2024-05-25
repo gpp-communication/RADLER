@@ -3,7 +3,7 @@ import json
 import numpy as np
 import matplotlib.pyplot as plt
 
-from .generate_grids import confmap2ra, ra2idx
+from generate_grids import confmap2ra, ra2idx
 
 
 def init_radar_json(n_frames):
@@ -21,6 +21,7 @@ def init_radar_json(n_frames):
                     scores=[]
                 )
             )
+        meta_all.append(meta_dict)
     return meta_all
 
 
@@ -35,7 +36,7 @@ def get_class_id(class_str, classes):
     return class_id
 
 
-def load_anno_txt(txt_path, n_frame, dataset):
+def load_anno_txt(txt_path, n_frame, range_grid, angle_grid):
     anno_dict = init_radar_json(n_frame)
     with open(txt_path, 'r') as f:
         data = f.readlines()
@@ -44,7 +45,7 @@ def load_anno_txt(txt_path, n_frame, dataset):
         frame_id = int(frame_id)
         r = float(r)
         a = float(a)
-        rid, aid = ra2idx(r, a, dataset.range_grid, dataset.angle_grid)
+        rid, aid = ra2idx(r, a, range_grid, angle_grid)
         anno_dict[frame_id]['rad_h']['n_objects'] += 1
         anno_dict[frame_id]['rad_h']['obj_info']['categories'].append(class_name)
         anno_dict[frame_id]['rad_h']['obj_info']['centers'].append([r, a])
@@ -102,9 +103,7 @@ def visualize_confmap(confmap, pps=None):
     plt.show()
 
 
-def generate_confmaps(metadata_dict, n_class, viz):
-    with open('../configs/radar_config.json') as f:
-        radar_configs = json.load(f)
+def generate_confmaps(metadata_dict, radar_configs, n_class, viz):
     with open('../configs/object_config.json') as f:
         object_config = json.load(f)
     confmaps = []
@@ -132,9 +131,9 @@ def generate_confmaps(metadata_dict, n_class, viz):
 def generate_confmap(n_obj, obj_info, radar_configs, config_dict, gaussian_thres=36):
     n_class = 3
     classes = ['pedestrian', 'car', 'cyclist']  # TODO: check the order of the object classes in the array
-    confmap_sigmas = config_dict['confmap_cfg']['confmap_sigmas']
-    confmap_sigmas_interval = config_dict['confmap_cfg']['confmap_sigmas_interval']
-    confmap_length = config_dict['confmap_cfg']['confmap_length']
+    confmap_sigmas = config_dict['confmap_sigmas']
+    confmap_sigmas_interval = config_dict['confmap_sigmas_interval']
+    confmap_length = config_dict['confmap_length']
 
     range_grid = confmap2ra('range', radar_configs)
 
@@ -164,4 +163,10 @@ def generate_confmap(n_obj, obj_info, radar_configs, config_dict, gaussian_thres
 
 
 if __name__ == '__main__':
-    pass
+    with open('../configs/radar_config.json') as radar_json:
+        radar_configs = json.load(radar_json)
+    meta_dict = load_anno_txt('./2019_04_09_BMS1000.txt', 897,
+                              confmap2ra('range', radar_configs), confmap2ra('angle', radar_configs))
+    # print(meta_dict)
+    confmaps = generate_confmaps(meta_dict, radar_configs, 3, False)
+    print(confmaps.shape)
