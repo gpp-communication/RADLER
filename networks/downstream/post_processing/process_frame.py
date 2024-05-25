@@ -1,3 +1,4 @@
+import torch
 import math
 import json
 import numpy as np
@@ -165,7 +166,7 @@ def post_process_single_frame(confmaps):
 
 
 if __name__ == '__main__':
-    test = np.random.randn(3, 224, 221)
+    test = np.random.uniform(0, 1, (3, 224, 221))
     # test = test/np.linalg.norm(test) normalization?
     results = post_process_single_frame(test)
     print(results)
