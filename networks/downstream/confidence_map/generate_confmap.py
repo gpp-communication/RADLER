@@ -130,7 +130,7 @@ def generate_confmaps(metadata_dict, radar_configs, n_class, viz):
 
 def generate_confmap(n_obj, obj_info, radar_configs, config_dict, gaussian_thres=36):
     n_class = 3
-    classes = ['pedestrian', 'car', 'cyclist']  # TODO: check the order of the object classes in the array
+    classes = ['pedestrian', 'cyclist', 'car']
     confmap_sigmas = config_dict['confmap_sigmas']
     confmap_sigmas_interval = config_dict['confmap_sigmas_interval']
     confmap_length = config_dict['confmap_length']
