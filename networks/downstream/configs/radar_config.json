@@ -2,7 +2,8 @@
     "ramap_rsize": 224,
     "ramap_asize": 221,
     "frame_rate": 15,
-    "crop_num": 3,
+    "crop_num_near": 7,
+    "crop_num_far": 24,
     "n_chirps": 255,
     "chirp_ids": [0],
     "sample_freq": 10e6,
@@ -14,8 +15,8 @@
     "ra_max_label": 60,
     "rr_min": 1.0,
     "rr_max": 33.7,
-    "ra_min": -90,
-    "ra_max": 90,
+    "ra_min": -60,
+    "ra_max": 60,
     "xz_dim": [224, 256],
     "z_max": 33.7
 }

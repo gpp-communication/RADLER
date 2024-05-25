@@ -165,8 +165,11 @@ def generate_confmap(n_obj, obj_info, radar_configs, config_dict, gaussian_thres
 if __name__ == '__main__':
     with open('../configs/radar_config.json') as radar_json:
         radar_configs = json.load(radar_json)
-    meta_dict = load_anno_txt('./2019_04_09_BMS1000.txt', 897,
-                              confmap2ra('range', radar_configs), confmap2ra('angle', radar_configs))
+    range_grids = confmap2ra('range', radar_configs)
+    angle_grids = confmap2ra('angle', radar_configs)
+    # print(range_grids)
+    # print(angle_grids)
+    meta_dict = load_anno_txt('./2019_04_09_BMS1000.txt', 897, range_grids, angle_grids)
     # print(meta_dict)
     confmaps = generate_confmaps(meta_dict, radar_configs, 3, False)
     print(confmaps.shape)
