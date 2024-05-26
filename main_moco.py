@@ -337,8 +337,12 @@ def main_worker(gpu, ngpus_per_node, args):
     args.checkpoints_dir = os.path.join(args.checkpoints_dir,
                                         '-'.join(['training', str(args.batch_size * ngpus_per_node), str(args.lr), str(args.moco_k)]))
     os.makedirs(args.checkpoints_dir, exist_ok=True)
-    with open(os.path.join(args.checkpoints_dir, "train.log"), 'w'):
-        pass
+    if args.resume is not "":
+        with open(os.path.join(args.checkpoints_dir, "train.log"), 'a'):
+            pass
+    else:
+        with open(os.path.join(args.checkpoints_dir, "train.log"), 'w'):
+            pass
 
     for epoch in range(args.start_epoch, args.epochs):
         if args.distributed:
