@@ -12,6 +12,7 @@ class SemanticDepthFeatureExtractor(nn.Module):
         self.backbone = nn.Sequential(*(list(torchvision.models.resnet18().children())[:-1]))
         self.ln = nn.Linear(512, 256)
         self.reshape = Rearrange('b (p1 p2) -> b p1 p2', p1=16, p2=16)
+        self.norm = nn.BatchNorm2d(1)
 
     def forward(self, x):
         x = self.conv(x)
