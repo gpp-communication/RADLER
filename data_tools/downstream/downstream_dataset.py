@@ -17,7 +17,7 @@ class DownstreamDataset(CRTUMDataset):
         for data_folder in self.data_folders:
             confmaps_folder = os.path.join(root_dir, data_folder, 'GT_CONFMAPS')
             for gt_confmap_file in os.listdir(confmaps_folder):
-                gt_confmaps.append(os.path.join(confmaps_folder, gt_confmap_file))
+                gt_confmaps.append(os.path.abspath(os.path.join(confmaps_folder, gt_confmap_file)))
         self.df['gt_confmaps'] = gt_confmaps
         self.df.drop('images', axis=1, inplace=True)
 
