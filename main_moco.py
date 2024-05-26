@@ -337,7 +337,7 @@ def main_worker(gpu, ngpus_per_node, args):
     args.checkpoints_dir = os.path.join(args.checkpoints_dir,
                                         '-'.join(['training', str(args.batch_size * ngpus_per_node), str(args.lr), str(args.moco_k)]))
     os.makedirs(args.checkpoints_dir, exist_ok=True)
-    if args.resume is not "":
+    if args.resume != "":
         with open(os.path.join(args.checkpoints_dir, "train.log"), 'a'):
             pass
     else:
