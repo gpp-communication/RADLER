@@ -10,7 +10,7 @@ parser.add_argument('log', type=str)
 def extract_epoch_loss_acc1_acc5(log: str):
     if not log.startswith('Epoch: ['):
         log = log.lstrip('\x00')
-    if len(log) == 135 or len(log) == 136:
+    if 130 < len(log) < 140:
         log = log.replace('      ', '    ')
         log_items = log.split('	')
         acc1 = log_items[4].replace('Acc@1', '').lstrip(' ').split(' ')[0]
