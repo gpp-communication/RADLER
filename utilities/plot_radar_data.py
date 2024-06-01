@@ -37,6 +37,7 @@ if __name__ == '__main__':
     fig, ax = plt.subplots(figsize=(8, 6))
     for split in ['training', 'testing']:
         for site in sites:
+            print(split, site)
             radar_data_folder = ('/Users/yluo/Pictures/CRTUM/data_cluster_1_2/downstream/' + split + '/'
                                  + site + '/RADAR_RA_H/')
             for radar_file in os.listdir(radar_data_folder):
