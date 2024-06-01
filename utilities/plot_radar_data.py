@@ -3,13 +3,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def plot_radar_data(radar_file_path: str, index: int):
+def plot_radar_data(radar_file_path: str):
+    frame_number = os.path.basename(radar_file_path).replace('.npy', '')
     data = np.load(radar_file_path)
     ax.imshow(data, origin='lower', aspect='auto')
 
     plt.xlabel("Angular (degrees)")
     plt.ylabel("Range (meters)")
-    plt.title("Range-Azimuth Map - No.%d" % index)
+    plt.title("Range-Azimuth Map - No.%d" % int(frame_number))
 
     major_x_ticks = np.arange(0, 221, 10)
     minor_x_ticks = np.arange(0, 221, 5)
@@ -26,7 +27,7 @@ def plot_radar_data(radar_file_path: str, index: int):
     ax.grid(which='major', alpha=0.5)
     radar_png_folder = os.path.join(os.path.dirname(os.path.dirname(radar_data_folder)), 'radar_png')
     os.makedirs(radar_png_folder, exist_ok=True)
-    plt.savefig(os.path.join(radar_png_folder, '%06d.png' % index))
+    plt.savefig(os.path.join(radar_png_folder, f'{frame_number}.png'))
     plt.cla()
 
 
@@ -38,5 +39,5 @@ if __name__ == '__main__':
         for site in sites:
             radar_data_folder = ('/Users/yluo/Pictures/CRTUM/data_cluster_1_2/downstream/' + split + '/'
                                  + site + '/RADAR_RA_H/')
-            for idx, radar_file in enumerate(os.listdir(radar_data_folder)):
-                plot_radar_data(os.path.join(radar_data_folder, radar_file), idx)
+            for radar_file in os.listdir(radar_data_folder):
+                plot_radar_data(os.path.join(radar_data_folder, radar_file))
