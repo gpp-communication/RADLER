@@ -1,23 +1,16 @@
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 
 
-if __name__ == '__main__':
-    fig, ax = plt.subplots(figsize=(8, 6))
-    data = np.load('/Users/yluo/Pictures/CRTUM/data_cluster_1_2/downstream/training/Arcisstraße1/RADAR_RA_H/000431.npy')
-    # Define range and angular parameters based on your radar information
-    min_range = 1.0  # meters (rr_min)
-    max_range = 33.7  # meters (rr_max)
-    min_angular = -60.0  # degrees (ra_min)
-    max_angular = 60.0  # degrees (ra_max)
-
-    # Create a plot with customized range and angular information
+def plot_radar_data(radar_file_path: str, index: int):
+    data = np.load(radar_file_path)
     ax.imshow(data, origin='lower', aspect='auto')
 
     plt.xlabel("Angular (degrees)")
     plt.ylabel("Range (meters)")
-    plt.title("Range-Azimuth Map")
-    # Major ticks every 20, minor ticks every 5
+    plt.title("Range-Azimuth Map - No.%d" % index)
+
     major_x_ticks = np.arange(0, 221, 10)
     minor_x_ticks = np.arange(0, 221, 5)
     major_y_ticks = np.arange(0, 224, 10)
@@ -31,5 +24,19 @@ if __name__ == '__main__':
     # And a corresponding grid
     ax.grid(which='minor', alpha=0.2)
     ax.grid(which='major', alpha=0.5)
-    # plt.savefig("2019_04_09_BMS1000_000000_0000.png")
-    plt.show()
+    radar_png_folder = os.path.join(os.path.dirname(os.path.dirname(radar_data_folder)), 'radar_png')
+    os.makedirs(radar_png_folder, exist_ok=True)
+    plt.savefig(os.path.join(radar_png_folder, '%06d.png' % index))
+    plt.cla()
+
+
+if __name__ == '__main__':
+    sites = ['Arcisstraße1', 'Arcisstraße2', 'Arcisstraße3', 'Arcisstraße4',
+             'Arcisstraße5', 'Gabelsbergerstraße1', 'Gabelsbergerstraße2']
+    fig, ax = plt.subplots(figsize=(8, 6))
+    for split in ['training', 'testing']:
+        for site in sites:
+            radar_data_folder = ('/Users/yluo/Pictures/CRTUM/data_cluster_1_2/downstream/' + split + '/'
+                                 + site + '/RADAR_RA_H/')
+            for idx, radar_file in enumerate(os.listdir(radar_data_folder)):
+                plot_radar_data(os.path.join(radar_data_folder, radar_file), idx)
