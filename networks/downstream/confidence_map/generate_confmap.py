@@ -77,31 +77,10 @@ def add_noise_channel(confmap, ramap_rsize, ramap_asize):
     return confmap_new
 
 
-def visualize_confmap(confmap, pps=None):
-    if pps is None:
-        pps = []
-    if len(confmap.shape) == 2:
-        plt.imshow(confmap, origin='lower', aspect='auto')
-        for pp in pps:
-            plt.scatter(pp[1], pp[0], s=5, c='white')
-        plt.show()
-        return
-    else:
-        n_channel, _, _ = confmap.shape
-    if n_channel == 3:
-        confmap_viz = np.transpose(confmap, (1, 2, 0))
-    elif n_channel > 3:
-        confmap_viz = np.transpose(confmap[:3, :, :], (1, 2, 0))
-        if n_channel == 4:
-            confmap_noise = confmap[3, :, :]
-            plt.imshow(confmap_noise, origin='lower', aspect='auto')
-            plt.show()
-    else:
-        print("Warning: wrong shape of confmap!")
-        return
+def visualize_confmap(confmap):
+    n_channel, _, _ = confmap.shape
+    confmap_viz = np.transpose(confmap[:3, :, :], (1, 2, 0))
     plt.imshow(confmap_viz, origin='lower', aspect='auto')
-    for pp in pps:
-        plt.scatter(pp[1], pp[0], s=5, c='white')
     plt.show()
 
 
@@ -181,4 +160,5 @@ if __name__ == '__main__':
     meta_dict = load_anno_txt('./test.txt', 1, range_grids, angle_grids)
     # print(meta_dict)
     confmaps = generate_confmaps(meta_dict, radar_configs, 3, False)
-    save_confmaps(confmaps, confmaps_dir='./')
+    visualize_confmap(confmaps[0])
+    # save_confmaps(confmaps, confmaps_dir='./')
