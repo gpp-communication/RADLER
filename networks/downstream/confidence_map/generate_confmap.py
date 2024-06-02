@@ -1,5 +1,7 @@
 import math
 import json
+import os
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -162,6 +164,13 @@ def generate_confmap(n_obj, obj_info, radar_configs, config_dict, gaussian_thres
     return confmap
 
 
+def save_confmaps(confmaps, confmaps_dir):
+    for frame_no in range(confmaps.shape[0]):
+        confmap = confmaps[frame_no]
+        confmap_path = os.path.join(confmaps_dir, '%06d.npy' % frame_no)
+        np.save(confmap_path, confmap)
+
+
 if __name__ == '__main__':
     with open('../configs/radar_config.json') as radar_json:
         radar_configs = json.load(radar_json)
@@ -169,7 +178,7 @@ if __name__ == '__main__':
     angle_grids = confmap2ra('angle', radar_configs)
     # print(range_grids)
     # print(angle_grids)
-    meta_dict = load_anno_txt('./2019_04_09_BMS1000.txt', 897, range_grids, angle_grids)
+    meta_dict = load_anno_txt('./test.txt', 1, range_grids, angle_grids)
     # print(meta_dict)
     confmaps = generate_confmaps(meta_dict, radar_configs, 3, False)
-    print(confmaps.shape)
+    save_confmaps(confmaps, confmaps_dir='./')
