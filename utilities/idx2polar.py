@@ -11,7 +11,6 @@ def idx2polar(annotation_file):
     objects = []
     with open(annotation_file, 'r') as f:
         for line in f.readlines():
-            if line:
                 frame_no, range, angle, obj_class = line.split(' ')
                 obj_dict = {'frame_no': int(frame_no), 'range': range_grids[int(range)],
                             'angle': angle_grids[int(angle)], 'object_class': obj_class.rstrip('\n')}
@@ -23,4 +22,7 @@ def idx2polar(annotation_file):
 
 
 if __name__ == '__main__':
-    idx2polar('./test.txt')
+    idx2polar('/Users/yluo/Pictures/CRTUM_new/data_cluster_1_2/downstream/train/Arcisstrasse1/Annotations_moving.txt')
+    idx2polar('/Users/yluo/Pictures/CRTUM_new/data_cluster_1_2/downstream/train/Arcisstrasse1/Annotations.txt')
+    # idx2polar('/Users/yluo/Pictures/CRTUM_new/data_cluster_1_2/downstream/train/Gabelsbergerstrasse1/Annotations_moving.txt')
+    # idx2polar('/Users/yluo/Pictures/CRTUM_new/data_cluster_1_2/downstream/train/Gabelsbergerstrasse1/Annotations.txt')
