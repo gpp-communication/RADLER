@@ -77,14 +77,20 @@ def add_noise_channel(confmap, ramap_rsize, ramap_asize):
     return confmap_new
 
 
-def visualize_confmap(confmap):
-    n_channel, _, _ = confmap.shape
-    confmap_viz = np.transpose(confmap[:3, :, :], (1, 2, 0))
-    plt.imshow(confmap_viz, origin='lower', aspect='auto')
-    plt.show()
+def visualize_confmap(confmaps, save_path):
+    num = confmaps.shape[0]
+    conf_folder = os.path.join(save_path, 'confmaps')
+    os.makedirs(conf_folder, exist_ok=True)
+    for i in range(num):
+        confmap = confmaps[i]
+        n_channel, _, _ = confmap.shape
+        confmap_viz = np.transpose(confmap[:3, :, :], (1, 2, 0))
+        plt.imshow(confmap_viz, origin='lower', aspect='auto')
+        plt.savefig(os.path.join(conf_folder, '%06d.png' % i))
+        plt.cla()
 
 
-def generate_confmaps(metadata_dict, radar_configs, n_class, viz):
+def generate_confmaps(metadata_dict, radar_configs, n_class):
     with open('../configs/object_config.json') as f:
         object_config = json.load(f)
     confmaps = []
@@ -102,8 +108,6 @@ def generate_confmaps(metadata_dict, radar_configs, n_class, viz):
             confmap_gt = add_noise_channel(confmap_gt, radar_configs['ramap_rsize'], radar_configs['ramap_asize'])
         assert confmap_gt.shape == (
             n_class + 1, radar_configs['ramap_rsize'], radar_configs['ramap_asize'])
-        if viz:
-            visualize_confmap(confmap_gt)
         confmaps.append(confmap_gt)
     confmaps = np.array(confmaps)
     return confmaps
@@ -157,8 +161,8 @@ if __name__ == '__main__':
     angle_grids = confmap2ra('angle', radar_configs)
     # print(range_grids)
     # print(angle_grids)
-    meta_dict = load_anno_txt('./test.txt', 1, range_grids, angle_grids)
+    meta_dict = load_anno_txt('./Annotations_polar.txt', 285, range_grids, angle_grids)
     # print(meta_dict)
-    confmaps = generate_confmaps(meta_dict, radar_configs, 3, False)
-    visualize_confmap(confmaps[0])
+    confmaps = generate_confmaps(meta_dict, radar_configs, 3)
+    visualize_confmap(confmaps, './')
     # save_confmaps(confmaps, confmaps_dir='./')
