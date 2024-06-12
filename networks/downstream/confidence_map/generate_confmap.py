@@ -13,16 +13,16 @@ def init_radar_json(n_frames):
     for frame_id in range(n_frames):
         meta_dict = dict(frame_id=frame_id)
         meta_dict['rad_h'] = dict(
-                frame_name=None,
-                n_objects=0,
-                obj_info=dict(
-                    anno_source=None,
-                    categories=[],
-                    centers=[],
-                    center_ids=[],
-                    scores=[]
-                )
+            frame_name=None,
+            n_objects=0,
+            obj_info=dict(
+                anno_source=None,
+                categories=[],
+                centers=[],
+                center_ids=[],
+                scores=[]
             )
+        )
         meta_all.append(meta_dict)
     return meta_all
 
@@ -41,7 +41,10 @@ def get_class_id(class_str, classes):
 def load_anno_txt(txt_path, n_frame, range_grid, angle_grid):
     anno_dict = init_radar_json(n_frame)
     with open(txt_path, 'r') as f:
-        data = f.readlines()
+        static = f.readlines()
+    with open(txt_path.replace('_polar', '_moving_polar'), 'r') as f:
+        moving = f.readlines()
+    data = static + moving
     for line in data:
         frame_id, r, a, class_name = line.rstrip().split()
         frame_id = int(frame_id)
@@ -161,8 +164,20 @@ if __name__ == '__main__':
     angle_grids = confmap2ra('angle', radar_configs)
     # print(range_grids)
     # print(angle_grids)
-    meta_dict = load_anno_txt('./Annotations_polar.txt', 285, range_grids, angle_grids)
-    # print(meta_dict)
-    confmaps = generate_confmaps(meta_dict, radar_configs, 3)
-    visualize_confmap(confmaps, './')
-    # save_confmaps(confmaps, confmaps_dir='./')
+    splits = ['train', 'test']
+    sites = ['Arcisstrasse1', 'Arcisstrasse2', 'Arcisstrasse3', 'Arcisstrasse4',
+             'Arcisstrasse5', 'Gabelsbergerstrasse1', 'Gabelsbergerstrasse2']
+    num_frames = {'train': {'Arcisstrasse1': 1137, 'Arcisstrasse2': 667, 'Arcisstrasse3': 1344, 'Arcisstrasse4': 1313,
+                            'Arcisstrasse5': 1413, 'Gabelsbergerstrasse1': 1075, 'Gabelsbergerstrasse2': 906},
+                  'test': {{'Arcisstrasse1': 285, 'Arcisstrasse2': 167, 'Arcisstrasse3': 337, 'Arcisstrasse4': 329,
+                            'Arcisstrasse5': 354, 'Gabelsbergerstrasse1': 270, 'Gabelsbergerstrasse2': 227}}
+                  }
+    for split in splits:
+        for site in sites:
+            anno_path = ("/Users/yluo/Pictures/CRTUM_new/data_cluster_1_2/downstream/" + split + '/' + site +
+                         '/Annotations_polar.txt')
+            meta_dict = load_anno_txt(anno_path, num_frames[split][site], range_grids, angle_grids)
+            # print(meta_dict)
+            confmaps = generate_confmaps(meta_dict, radar_configs, 3)
+            visualize_confmap(confmaps, './')
+            # save_confmaps(confmaps, confmaps_dir='./')
