@@ -169,8 +169,8 @@ if __name__ == '__main__':
              'Arcisstrasse5', 'Gabelsbergerstrasse1', 'Gabelsbergerstrasse2']
     num_frames = {'train': {'Arcisstrasse1': 1137, 'Arcisstrasse2': 667, 'Arcisstrasse3': 1344, 'Arcisstrasse4': 1313,
                             'Arcisstrasse5': 1413, 'Gabelsbergerstrasse1': 1075, 'Gabelsbergerstrasse2': 906},
-                  'test': {{'Arcisstrasse1': 285, 'Arcisstrasse2': 167, 'Arcisstrasse3': 337, 'Arcisstrasse4': 329,
-                            'Arcisstrasse5': 354, 'Gabelsbergerstrasse1': 270, 'Gabelsbergerstrasse2': 227}}
+                  'test': {'Arcisstrasse1': 285, 'Arcisstrasse2': 167, 'Arcisstrasse3': 337, 'Arcisstrasse4': 329,
+                            'Arcisstrasse5': 354, 'Gabelsbergerstrasse1': 270, 'Gabelsbergerstrasse2': 227}
                   }
     for split in splits:
         for site in sites:
