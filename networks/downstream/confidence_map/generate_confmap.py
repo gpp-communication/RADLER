@@ -180,5 +180,5 @@ if __name__ == '__main__':
             meta_dict = load_anno_txt(anno_path, num_frames[split][site], range_grids, angle_grids)
             # print(meta_dict)
             confmaps = generate_confmaps(meta_dict, radar_configs, 3)
-            visualize_confmap(confmaps, './')
+            visualize_confmap(confmaps, os.path.dirname(anno_path))
             # save_confmaps(confmaps, confmaps_dir='./')
