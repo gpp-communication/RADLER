@@ -46,7 +46,7 @@ if __name__ == '__main__':
     print("Processed feature maps shape")
     for fm in processed_feature_maps:
         print(fm.shape)
-
+    np.save('feature_maps.npy', processed_feature_maps)
     # Plot the feature maps
     fig = plt.figure(figsize=(30, 50))
     for i in range(len(processed_feature_maps)):
