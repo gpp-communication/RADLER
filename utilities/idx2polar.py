@@ -22,7 +22,11 @@ def idx2polar(annotation_file):
 
 
 if __name__ == '__main__':
-    idx2polar('/Users/yluo/Pictures/CRTUM_new/data_cluster_1_2/downstream/train/Arcisstrasse1/Annotations_moving.txt')
-    idx2polar('/Users/yluo/Pictures/CRTUM_new/data_cluster_1_2/downstream/train/Arcisstrasse1/Annotations.txt')
-    # idx2polar('/Users/yluo/Pictures/CRTUM_new/data_cluster_1_2/downstream/train/Gabelsbergerstrasse1/Annotations_moving.txt')
-    # idx2polar('/Users/yluo/Pictures/CRTUM_new/data_cluster_1_2/downstream/train/Gabelsbergerstrasse1/Annotations.txt')
+    splits = ['train', 'test']
+    sites = ['Arcisstrasse1', 'Arcisstrasse2', 'Arcisstrasse3', 'Arcisstrasse4',
+             'Arcisstrasse5', 'Gabelsbergerstrasse1', 'Gabelsbergerstrasse2']
+    for split in splits:
+        for site in sites:
+            print(split, site)
+            idx2polar('/Users/yluo/Pictures/CRTUM_new/data_cluster_1_2/downstream/' + split + '/' + site + '/Annotations_moving.txt')
+            idx2polar('/Users/yluo/Pictures/CRTUM_new/data_cluster_1_2/downstream/' + split + '/' + site + '/Annotations.txt')

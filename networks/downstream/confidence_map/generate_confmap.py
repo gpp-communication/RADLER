@@ -176,7 +176,7 @@ if __name__ == '__main__':
         for site in sites:
             print(split, site)
             anno_path = ("/Users/yluo/Pictures/CRTUM_new/data_cluster_1_2/downstream/" + split + '/' + site +
-                         '/Annotations_polar.txt')
+                         '/' + site + '.txt')
             meta_dict = load_anno_txt(anno_path, num_frames[split][site], range_grids, angle_grids)
             # print(meta_dict)
             confmaps = generate_confmaps(meta_dict, radar_configs, 3)
