@@ -1,8 +1,8 @@
 {
   "confmap_sigmas": {
-    "car": 30,
-    "cyclist": 20,
-    "pedestrian": 15
+    "car": 32,
+    "cyclist": 25,
+    "pedestrian": 20
   },
   "confmap_sigmas_interval": {
     "pedestrian": [
@@ -19,8 +19,8 @@
     ]
   },
   "confmap_length": {
-    "pedestrian": 1,
-    "cyclist": 2,
-    "car": 3
+    "pedestrian": 1.5,
+    "cyclist": 2.5,
+    "car": 3.5
   }
 }

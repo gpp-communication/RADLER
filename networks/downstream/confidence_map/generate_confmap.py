@@ -164,13 +164,14 @@ if __name__ == '__main__':
     angle_grids = confmap2ra('angle', radar_configs)
     # print(range_grids)
     # print(angle_grids)
-    splits = ['train', 'test']
+    splits = ['test', 'train']
     sites = ['Arcisstrasse1', 'Arcisstrasse2', 'Arcisstrasse3', 'Arcisstrasse4',
              'Arcisstrasse5', 'Gabelsbergerstrasse1', 'Gabelsbergerstrasse2']
+    sites = ['Arcisstrasse1']
     num_frames = {'train': {'Arcisstrasse1': 1137, 'Arcisstrasse2': 667, 'Arcisstrasse3': 1344, 'Arcisstrasse4': 1314,
                             'Arcisstrasse5': 1414, 'Gabelsbergerstrasse1': 1076, 'Gabelsbergerstrasse2': 907},
                   'test': {'Arcisstrasse1': 285, 'Arcisstrasse2': 167, 'Arcisstrasse3': 337, 'Arcisstrasse4': 329,
-                            'Arcisstrasse5': 354, 'Gabelsbergerstrasse1': 270, 'Gabelsbergerstrasse2': 227}
+                           'Arcisstrasse5': 354, 'Gabelsbergerstrasse1': 270, 'Gabelsbergerstrasse2': 227}
                   }
     for split in splits:
         for site in sites:
@@ -179,6 +180,8 @@ if __name__ == '__main__':
                          '/' + site + '.txt')
             meta_dict = load_anno_txt(anno_path, num_frames[split][site], range_grids, angle_grids)
             # print(meta_dict)
+            print("Load annotations done")
             confmaps = generate_confmaps(meta_dict, radar_configs, 3)
+            print("Generate confmaps done")
             visualize_confmap(confmaps, os.path.dirname(anno_path))
             # save_confmaps(confmaps, confmaps_dir='./')
