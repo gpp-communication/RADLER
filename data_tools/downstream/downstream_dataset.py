@@ -19,9 +19,9 @@ class DownstreamDataset(CRTUMDataset):
             for gt_confmap_file in os.listdir(confmaps_folder):
                 gt_confmaps.append(os.path.abspath(os.path.join(confmaps_folder, gt_confmap_file)))
         self.df['gt_confmaps'] = gt_confmaps
-        self.df.drop('images', axis=1, inplace=True)
 
     def __getitem__(self, idx):
+        img_path = self.df['images'][idx]
         radar_path = self.df['radar_frames'][idx]
         gt_confmap_path = self.df['gt_confmaps'][idx]
         radar_frame = np.load(radar_path)
@@ -37,11 +37,11 @@ class DownstreamDataset(CRTUMDataset):
         if self.semantic_depth_transform is not None:
             semantic_depth_tensor = self.semantic_depth_transform(semantic_depth_tensor)
             semantic_depth_tensor = semantic_depth_tensor.to(dtype=torch.float32)
-        return radar_frame, semantic_depth_tensor, gt_confmap
+        return img_path, radar_frame, semantic_depth_tensor, gt_confmap
 
 
 if __name__ == '__main__':
     dataset = DownstreamDataset('../../datasets/test', transforms.ToTensor(), transforms.ToTensor())
-    dataloader = DataLoader(dataset, batch_size=8, shuffle=True, num_workers=4)
-    for radar, semantic_depth, gt_conf in dataloader:
-        print(radar.shape, semantic_depth.shape, gt_conf.shape)
+    dataloader = DataLoader(dataset, batch_size=1, shuffle=True, num_workers=4)
+    for img_path, radar, semantic_depth, gt_conf in dataloader:
+        print(img_path, radar.shape, semantic_depth.shape, gt_conf.shape)
