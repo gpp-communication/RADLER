@@ -167,7 +167,6 @@ if __name__ == '__main__':
     splits = ['test', 'train']
     sites = ['Arcisstrasse1', 'Arcisstrasse2', 'Arcisstrasse3', 'Arcisstrasse4',
              'Arcisstrasse5', 'Gabelsbergerstrasse1', 'Gabelsbergerstrasse2']
-    sites = ['Arcisstrasse1']
     num_frames = {'train': {'Arcisstrasse1': 1137, 'Arcisstrasse2': 667, 'Arcisstrasse3': 1344, 'Arcisstrasse4': 1314,
                             'Arcisstrasse5': 1414, 'Gabelsbergerstrasse1': 1076, 'Gabelsbergerstrasse2': 907},
                   'test': {'Arcisstrasse1': 285, 'Arcisstrasse2': 167, 'Arcisstrasse3': 337, 'Arcisstrasse4': 329,
@@ -178,10 +177,13 @@ if __name__ == '__main__':
             print(split, site)
             anno_path = ("/Users/yluo/Pictures/CRTUM_new/data_cluster_1_2/downstream/" + split + '/' + site +
                          '/' + site + '.txt')
+            conf_folder = ("/Users/yluo/Pictures/CRTUM_new/data_cluster_1_2/downstream/" + split + '/' + site +
+                         '/GT_CONFMAPS')
+            os.makedirs(conf_folder, exist_ok=True)
             meta_dict = load_anno_txt(anno_path, num_frames[split][site], range_grids, angle_grids)
             # print(meta_dict)
             print("Load annotations done")
             confmaps = generate_confmaps(meta_dict, radar_configs, 3)
             print("Generate confmaps done")
-            visualize_confmap(confmaps, os.path.dirname(anno_path))
-            # save_confmaps(confmaps, confmaps_dir='./')
+            # visualize_confmap(confmaps, os.path.dirname(anno_path))
+            save_confmaps(confmaps, confmaps_dir=conf_folder)
