@@ -37,7 +37,7 @@ class DownstreamDataset(CRTUMDataset):
         if self.semantic_depth_transform is not None:
             semantic_depth_tensor = self.semantic_depth_transform(semantic_depth_tensor)
             semantic_depth_tensor = semantic_depth_tensor.to(dtype=torch.float32)
-        return img_path, radar_frame, semantic_depth_tensor, gt_confmap
+        return img_path, radar_frame, semantic_depth_tensor, gt_confmap[:3]
 
 
 if __name__ == '__main__':
