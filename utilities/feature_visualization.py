@@ -26,12 +26,12 @@ def load_radar_data(paths):
 
 if __name__ == '__main__':
     radar_paths = []
-    radar_folder_dir = './test_npy_different'
+    radar_folder_dir = '/home/stud/luoyu/storage/user/luoyu/projects/Radio-Vision-CityGML/utilities/test_npy_different'
     for root, dirs, files in os.walk(radar_folder_dir):
         for file in files:
             radar_paths.append(os.path.join(root, file))
     radar_data = load_radar_data(radar_paths)
-    encoder = pretrained_encoder('/Users/yluo/Downloads/checkpoints/test/checkpoint_0029.pth.tar')
+    encoder = pretrained_encoder('/home/stud/luoyu/storage/user/luoyu/projects/Radio-Vision-CityGML/logs/checkpoints/ssl/random-transform-0.8/training-64-1e-05-512/checkpoint_0019.pth.tar')
     encoder.eval()
     rearrange = Rearrange('b (p1 p2) d -> b d p1 p2', p1=16, p2=16)
     with torch.no_grad():
@@ -55,3 +55,4 @@ if __name__ == '__main__':
         ax.axis("off")
         ax.set_title(i, fontsize=30)
     plt.show()
+    plt.savefig('feature_maps.png')
