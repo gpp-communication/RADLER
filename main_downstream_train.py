@@ -136,6 +136,12 @@ parser.add_argument(
     "--fuse-semantic-depth-tensor", default=False, action="store_true",
     help="whether to fuse semantic depth tensor"
 )
+parser.add_argument(
+    "--checkpoints-dir",
+    default='./logs/checkpoints/downstream',
+    type=str,
+    help="folder path to save checkpoints"
+)
 
 
 def main():
@@ -302,7 +308,9 @@ def main_worker(gpu, ngpus_per_node, args):
                     "state_dict": model.state_dict(),
                     "optimizer": optimizer.state_dict(),
                 },
-                False,
+                is_best=False,
+                checkpoints_dir=args.checkpoints_dir,
+                filename="checkpoint_{:04d}.pth.tar".format(epoch)
             )
 
 
@@ -313,6 +321,7 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
     progress = ProgressMeter(
         len(train_loader),
         [batch_time, data_time, losses],
+        os.path.join(args.checkpoints_dir, "train.log"),
         prefix="Epoch: [{}]".format(epoch),
     )
 
@@ -346,10 +355,10 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
             progress.display(i)
 
 
-def save_checkpoint(state, is_best, filename="checkpoint.pth.tar"):
-    torch.save(state, filename)
+def save_checkpoint(state, is_best, checkpoints_dir, filename="checkpoint.pth.tar"):
+    torch.save(state, os.path.join(checkpoints_dir, filename))
     if is_best:
-        shutil.copyfile(filename, "model_best.pth.tar")
+        shutil.copyfile(os.path.join(checkpoints_dir, filename), os.path.join(checkpoints_dir, "model_best.pth.tar"))
 
 
 class AverageMeter:
@@ -378,15 +387,18 @@ class AverageMeter:
 
 
 class ProgressMeter:
-    def __init__(self, num_batches, meters, prefix=""):
+    def __init__(self, num_batches, meters, train_log, prefix=""):
         self.batch_fmtstr = self._get_batch_fmtstr(num_batches)
         self.meters = meters
+        self.train_log = train_log
         self.prefix = prefix
 
     def display(self, batch):
         entries = [self.prefix + self.batch_fmtstr.format(batch)]
         entries += [str(meter) for meter in self.meters]
-        print("\t".join(entries))
+        with open(self.train_log, 'a+') as f_log:
+            f_log.write("\t".join(entries))
+            f_log.write("\n")
 
     def _get_batch_fmtstr(self, num_batches):
         num_digits = len(str(num_batches // 1))
