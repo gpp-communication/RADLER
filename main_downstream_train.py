@@ -22,9 +22,11 @@ import torch.nn.parallel
 import torch.optim
 import torch.utils.data
 import torch.utils.data.distributed
+import torchvision.transforms as transforms
 
 from networks.downstream import RadarObjectDetector
 from data_tools.downstream import DownstreamDataset
+from models.ssl_encoder import radar_transform
 
 parser = argparse.ArgumentParser(description="PyTorch Radar Object Detection Training with Semantic Depth Tensor")
 parser.add_argument("data", metavar="DIR", help="path to dataset")
@@ -98,13 +100,6 @@ parser.add_argument(
     help="path to latest checkpoint (default: none)",
 )
 parser.add_argument(
-    "-t",
-    "--test",
-    dest="test",
-    action="store_true",
-    help="evaluate model on test set",
-)
-parser.add_argument(
     "--world-size",
     default=-1,
     type=int,
@@ -134,8 +129,13 @@ parser.add_argument(
          "fastest way to use PyTorch for either single node or "
          "multi node data parallel training",
 )
-
-best_acc1 = 0
+parser.add_argument(
+    "--pretrained", default="", type=str, help="path to moco pretrained checkpoint"
+)
+parser.add_argument(
+    "--fuse-semantic-depth-tensor", default=False, action="store_true",
+    help="whether to fuse semantic depth tensor"
+)
 
 
 def main():
@@ -178,7 +178,6 @@ def main():
 
 
 def main_worker(gpu, ngpus_per_node, args):
-    global best_acc1
     args.gpu = gpu
 
     # suppress printing if not master
@@ -206,7 +205,7 @@ def main_worker(gpu, ngpus_per_node, args):
         )
     # create model
     print("=> creating model '{}'".format("Radar Object Detector"))
-    model = RadarObjectDetector()
+    model = RadarObjectDetector(args.pretrained, 3, args.fuse_semantic_depth_tensor)
 
     if args.distributed:
         # For multiprocessing distributed, DistributedDataParallel constructor
@@ -253,10 +252,6 @@ def main_worker(gpu, ngpus_per_node, args):
                 loc = "cuda:{}".format(args.gpu)
                 checkpoint = torch.load(args.resume, map_location=loc)
             args.start_epoch = checkpoint["epoch"]
-            best_acc1 = checkpoint["best_acc1"]
-            if args.gpu is not None:
-                # best_acc1 may be from a checkpoint from a different GPU
-                best_acc1 = best_acc1.to(args.gpu)
             model.load_state_dict(checkpoint["state_dict"])
             optimizer.load_state_dict(checkpoint["optimizer"])
             print(
@@ -271,7 +266,9 @@ def main_worker(gpu, ngpus_per_node, args):
 
     # Data loading code
     train_dataset_dir = os.path.join(args.data_dir, "train")
-    train_dataset = DownstreamDataset(train_dataset_dir)
+    radar_transforms = radar_transform()
+    semantic_depth_transforms = transforms.Compose([transforms.ToTensor()])
+    train_dataset = DownstreamDataset(train_dataset_dir, radar_transforms, semantic_depth_transforms)
 
     if args.distributed:
         train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
@@ -287,19 +284,6 @@ def main_worker(gpu, ngpus_per_node, args):
         sampler=train_sampler,
     )
 
-    test_dataset_dir = os.path.join(args.data_dir, "test")
-    test_loader = torch.utils.data.DataLoader(
-        DownstreamDataset(test_dataset_dir),
-        batch_size=args.batch_size,
-        shuffle=False,
-        num_workers=args.workers,
-        pin_memory=True,
-    )
-
-    if args.test:
-        test(test_loader, model, criterion, args)
-        return
-
     for epoch in range(args.start_epoch, args.epochs):
         if args.distributed:
             train_sampler.set_epoch(epoch)
@@ -307,13 +291,6 @@ def main_worker(gpu, ngpus_per_node, args):
 
         # train for one epoch
         train(train_loader, model, criterion, optimizer, epoch, args)
-
-        # evaluate on test set
-        acc1 = test(test_loader, model, criterion, args)
-
-        # remember best acc@1 and save checkpoint
-        is_best = acc1 > best_acc1
-        best_acc1 = max(acc1, best_acc1)
 
         if not args.multiprocessing_distributed or (
                 args.multiprocessing_distributed and args.rank % ngpus_per_node == 0
@@ -323,10 +300,9 @@ def main_worker(gpu, ngpus_per_node, args):
                     "epoch": epoch + 1,
                     "arch": args.arch,
                     "state_dict": model.state_dict(),
-                    "best_acc1": best_acc1,
                     "optimizer": optimizer.state_dict(),
                 },
-                is_best,
+                False,
             )
 
 
@@ -334,43 +310,28 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
     batch_time = AverageMeter("Time", ":6.3f")
     data_time = AverageMeter("Data", ":6.3f")
     losses = AverageMeter("Loss", ":.4e")
-    top1 = AverageMeter("Acc@1", ":6.2f")
-    top5 = AverageMeter("Acc@5", ":6.2f")
     progress = ProgressMeter(
         len(train_loader),
-        [batch_time, data_time, losses, top1, top5],
+        [batch_time, data_time, losses],
         prefix="Epoch: [{}]".format(epoch),
     )
 
-    """
-    Switch to eval mode:
-    Under the protocol of linear classification on frozen features/models,
-    it is not legitimate to change any part of the pre-trained model.
-    BatchNorm in train mode may revise running mean/std (even if it receives
-    no gradient), which are part of the model parameters too.
-    """
-    model.eval()
-
     end = time.time()
     # TODO: adopt the images and target to CRTUM dataset
-    for i, (images, target) in enumerate(train_loader):
+    for i, (image_paths, radar_data, semantic_depth_tensors, gt_confmaps) in enumerate(train_loader):
         # measure data loading time
         data_time.update(time.time() - end)
 
         if args.gpu is not None:
-            images = images.cuda(args.gpu, non_blocking=True)
-        target = target.cuda(args.gpu, non_blocking=True)
+            radar_data = radar_data.cuda(args.gpu, non_blocking=True)
+        gt_confmaps = gt_confmaps.cuda(args.gpu, non_blocking=True)
 
         # compute output
-        output = model(images)
-        loss = criterion(output, target)
+        output_confmap = model(radar_data, semantic_depth_tensors)
+        loss = criterion(output_confmap, gt_confmaps[:3, :, :])
 
         # measure accuracy and record loss
-        # TODO: check if it is possible to calculate accuracy any more
-        acc1, acc5 = accuracy(output, target, topk=(1, 5))
-        losses.update(loss.item(), images.size(0))
-        top1.update(acc1[0], images.size(0))
-        top5.update(acc5[0], images.size(0))
+        losses.update(loss.item(), radar_data.size(0))
 
         # compute gradient and do SGD step
         optimizer.zero_grad()
@@ -383,50 +344,6 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
 
         if i % args.print_freq == 0:
             progress.display(i)
-
-
-def test(test_loader, model, criterion, args):
-    batch_time = AverageMeter("Time", ":6.3f")
-    losses = AverageMeter("Loss", ":.4e")
-    top1 = AverageMeter("Acc@1", ":6.2f")
-    top5 = AverageMeter("Acc@5", ":6.2f")
-    progress = ProgressMeter(
-        len(test_loader), [batch_time, losses, top1, top5], prefix="Test: "
-    )
-
-    # switch to evaluate mode
-    model.eval()
-
-    with torch.no_grad():
-        end = time.time()
-        for i, (images, target) in enumerate(test_loader):
-            if args.gpu is not None:
-                images = images.cuda(args.gpu, non_blocking=True)
-            target = target.cuda(args.gpu, non_blocking=True)
-
-            # compute output
-            output = model(images)
-            loss = criterion(output, target)
-
-            # measure accuracy and record loss
-            acc1, acc5 = accuracy(output, target, topk=(1, 5))
-            losses.update(loss.item(), images.size(0))
-            top1.update(acc1[0], images.size(0))
-            top5.update(acc5[0], images.size(0))
-
-            # measure elapsed time
-            batch_time.update(time.time() - end)
-            end = time.time()
-
-            if i % args.print_freq == 0:
-                progress.display(i)
-
-        # TODO: this should also be done with the ProgressMeter
-        print(
-            " * Acc@1 {top1.avg:.3f} Acc@5 {top5.avg:.3f}".format(top1=top1, top5=top5)
-        )
-
-    return top1.avg
 
 
 def save_checkpoint(state, is_best, filename="checkpoint.pth.tar"):
@@ -484,23 +401,6 @@ def adjust_learning_rate(optimizer, epoch, args):
         lr *= 0.1 if epoch >= milestone else 1.0
     for param_group in optimizer.param_groups:
         param_group["lr"] = lr
-
-
-def accuracy(output, target, topk=(1,)):
-    """Computes the accuracy over the k top predictions for the specified values of k"""
-    with torch.no_grad():
-        maxk = max(topk)
-        batch_size = target.size(0)
-
-        _, pred = output.topk(maxk, 1, True, True)
-        pred = pred.t()
-        correct = pred.eq(target.view(1, -1).expand_as(pred))
-
-        res = []
-        for k in topk:
-            correct_k = correct[:k].view(-1).float().sum(0, keepdim=True)
-            res.append(correct_k.mul_(100.0 / batch_size))
-        return res
 
 
 if __name__ == "__main__":
