@@ -2,6 +2,7 @@ import torch
 import argparse
 import numpy as np
 import torch.nn as nn
+from torch.nn.modules.module import T
 from einops.layers.torch import Rearrange
 
 from models.radio_decoder import RODDecoder
@@ -53,6 +54,11 @@ class RadarObjectDetector(nn.Module):
             x = x + semantic_depth_feature  # Add the semantic depth feature to every channel of the radar frame feature
             x = self.norm(x)
         return self.decoder(x)
+
+    def train(self: T, mode: bool = True) -> T:
+        super().train(mode)
+        self.encoder.eval()
+        return self
 
 
 if __name__ == '__main__':
