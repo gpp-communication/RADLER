@@ -12,7 +12,7 @@ class RODDecoder(nn.Module):
                                          kernel_size=(6, 6), stride=(2, 2), padding=(2, 2))
         self.convt3 = nn.ConvTranspose2d(in_channels=64, out_channels=n_class,
                                          kernel_size=(6, 6), stride=(2, 2), padding=(2, 2))
-        self.convt4 = nn.ConvTranspose2d(in_channels=3, out_channels=n_class,
+        self.convt4 = nn.ConvTranspose2d(in_channels=n_class, out_channels=n_class,
                                          kernel_size=(10, 7), stride=(2, 2), padding=(20, 20))
         self.prelu = nn.PReLU()
         self.sigmoid = nn.Sigmoid()
