@@ -40,9 +40,11 @@ class RadarObjectDetector(nn.Module):
         self.channel_resize = nn.Conv2d(1280, 256, kernel_size=1, stride=1, padding=0)
         self.norm = nn.BatchNorm2d(256)
 
+        for param in self.encoder.parameters():
+            param.requires_grad = False
+
     def forward(self, x, semantic_depth_tensor=None):
-        with torch.no_grad():
-            x = self.encoder(x)
+        x = self.encoder(x)
         x = self.feature_reshape(x)
         x = self.channel_resize(x)
         x = self.norm(x)
