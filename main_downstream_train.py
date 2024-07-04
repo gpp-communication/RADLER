@@ -348,7 +348,7 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
 
         # compute output
         output_confmap = model(radar_data, semantic_depth_tensors)
-        loss = criterion(output_confmap, gt_confmaps[:, :3, :, :])
+        loss = criterion(output_confmap, gt_confmaps)
 
         # visualize training process
         if i % 100 == 0:

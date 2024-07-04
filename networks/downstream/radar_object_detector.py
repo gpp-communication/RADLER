@@ -32,7 +32,7 @@ class RadarObjectDetector(nn.Module):
     def __init__(self, pretrained_model, num_class=3, fuse_semantic_depth_feature=False):
         super(RadarObjectDetector, self).__init__()
         self.fuse_semantic_depth_feature = fuse_semantic_depth_feature
-        self.encoder = pretrained_encoder(pretrained_model)
+        self.encoder = SSLEncoder()
         self.decoder = RODDecoder(num_class)
         if self.fuse_semantic_depth_feature:
             self.semantic_depth_feature_extractor = SemanticDepthFeatureExtractor()
@@ -76,6 +76,9 @@ if __name__ == '__main__':
     semantic_depth_tensor_test = np.expand_dims(semantic_depth_tensor_test, 0)
     semantic_depth_tensor_test = torch.from_numpy(semantic_depth_tensor_test).to(torch.float32)
     model.eval()
+    criterion = nn.BCELoss()
     with torch.no_grad():
         output = model(test, semantic_depth_tensor_test)
+        loss = criterion(output, torch.rand(1, 3, 224, 221))
+        print(loss)
         print(output.shape)

@@ -30,13 +30,14 @@ class DownstreamDataset(CRTUMDataset):
         radar_frame = np.pad(radar_frame, ((0, 0), (2, 1), (0, 0)), 'constant')
         semantic_depth_tensor = np.load(os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(radar_path)),
                                                                      self.semantic_depth_file_name)))
-        gt_confmap = np.load(gt_confmap_path)
         if self.radar_transform is not None:
             radar_frame = self.radar_transform(radar_frame)
             radar_frame = radar_frame.to(dtype=torch.float32)
         if self.semantic_depth_transform is not None:
             semantic_depth_tensor = self.semantic_depth_transform(semantic_depth_tensor)
             semantic_depth_tensor = semantic_depth_tensor.to(dtype=torch.float32)
+        gt_confmap = np.load(gt_confmap_path)
+        gt_confmap = torch.from_numpy(gt_confmap).float()
         return img_path, radar_frame, semantic_depth_tensor, gt_confmap[:3]
 
 
