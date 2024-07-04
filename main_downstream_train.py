@@ -310,7 +310,7 @@ def main_worker(gpu, ngpus_per_node, args):
             save_checkpoint(
                 {
                     "epoch": epoch + 1,
-                    "arch": args.arch,
+                    "arch": "Radar Object Detector",
                     "state_dict": model.state_dict(),
                     "optimizer": optimizer.state_dict(),
                 },
