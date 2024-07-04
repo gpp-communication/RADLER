@@ -12,6 +12,7 @@ import random
 import shutil
 import time
 import warnings
+import subprocess
 
 import torch
 import torch.backends.cudnn as cudnn
@@ -198,11 +199,14 @@ def main_worker(gpu, ngpus_per_node, args):
 
     if args.distributed:
         if args.dist_url == "env://" and args.rank == -1:
-            args.rank = int(os.environ["RANK"])
-        if args.multiprocessing_distributed:
-            # For multiprocessing distributed training, rank needs to be the
-            # global rank among all the processes
-            args.rank = args.rank * ngpus_per_node + gpu
+            args.rank = int(os.environ["SLURM_PROCID"])
+        if "MASTER_ADDR" not in os.environ:
+            node_list = os.environ["SLURM_NODELIST"]
+            os.environ["MASTER_ADDR"] = subprocess.getoutput(f"scontrol show hostname {node_list} | head -n1")
+            if "MASTER_PORT" in os.environ:
+                pass  # use MASTER_PORT in the environment variable
+            else:
+                os.environ["MASTER_PORT"] = "29500"
         dist.init_process_group(
             backend=args.dist_backend,
             init_method=args.dist_url,
@@ -271,7 +275,7 @@ def main_worker(gpu, ngpus_per_node, args):
     cudnn.benchmark = True
 
     # Data loading code
-    train_dataset_dir = os.path.join(args.data_dir, "train")
+    train_dataset_dir = args.data
     radar_transforms = radar_transform()
     semantic_depth_transforms = transforms.Compose([transforms.ToTensor()])
     train_dataset = DownstreamDataset(train_dataset_dir, radar_transforms, semantic_depth_transforms)
@@ -326,7 +330,6 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
     )
 
     end = time.time()
-    # TODO: adopt the images and target to CRTUM dataset
     for i, (image_paths, radar_data, semantic_depth_tensors, gt_confmaps) in enumerate(train_loader):
         # measure data loading time
         data_time.update(time.time() - end)
@@ -337,7 +340,7 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
 
         # compute output
         output_confmap = model(radar_data, semantic_depth_tensors)
-        loss = criterion(output_confmap, gt_confmaps[:3, :, :])
+        loss = criterion(output_confmap, gt_confmaps[:, :3, :, :])
 
         # measure accuracy and record loss
         losses.update(loss.item(), radar_data.size(0))
