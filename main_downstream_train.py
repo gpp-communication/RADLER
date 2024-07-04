@@ -349,9 +349,11 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
             fig_path = os.path.join(args.checkpoints_dir, '%d_%d.png' % (epoch, i))
             image_path = image_paths[0]
             radar_path = image_path.replace('IMAGES_0', 'RADAR_RA_H').replace('png', 'npy')
+            gt_confmap_path = image_path.replace('IMAGES_0', 'GT_CONFMAPS').replace('png', 'npy')
             raw_radar_data = np.load(radar_path)
+            gt_confmap = np.load(gt_confmap_path)
             visualize_training(fig_path, image_path, raw_radar_data, output_confmap[0].cpu().detach().numpy(),
-                               gt_confmaps[0, :3, :, :].cpu().detach().numpy())
+                               gt_confmap[:3, :, :])
 
         # measure accuracy and record loss
         losses.update(loss.item(), radar_data.size(0))
