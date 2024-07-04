@@ -274,6 +274,10 @@ def main_worker(gpu, ngpus_per_node, args):
         else:
             print("=> no checkpoint found at '{}'".format(args.resume))
 
+    args.checkpoints_dir = os.path.join(args.checkpoints_dir,
+                                        '-'.join(['training', str(args.batch_size * ngpus_per_node), str(args.lr)]))
+    os.makedirs(args.checkpoints_dir, exist_ok=True)
+
     cudnn.benchmark = True
 
     # Data loading code
