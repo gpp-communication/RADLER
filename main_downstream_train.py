@@ -329,7 +329,7 @@ def main_worker(gpu, ngpus_per_node, args):
 def train(train_loader, model, criterion, optimizer, epoch, args):
     batch_time = AverageMeter("Time", ":6.3f")
     data_time = AverageMeter("Data", ":6.3f")
-    losses = AverageMeter("Loss", ":.4e")
+    losses = AverageMeter("Loss", ":.4f")
     progress = ProgressMeter(
         len(train_loader),
         [batch_time, data_time, losses],
