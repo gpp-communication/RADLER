@@ -16,7 +16,7 @@ class RODDecoder(nn.Module):
                                          kernel_size=(6, 6), stride=(2, 2), padding=(2, 2))
         self.conv = nn.Conv2d(in_channels=16, out_channels=n_class,
                               kernel_size=1)
-        self.upsample = nn.Upsample(size=(224, 221), mode='bilinear')
+        self.downsample = nn.Upsample(size=(224, 221), mode='bilinear')
         self.prelu = nn.PReLU()
         self.sigmoid = nn.Sigmoid()
         # self.upsample = nn.Upsample(size=(rodnet_configs['win_size'], radar_configs['ramap_rsize'],
@@ -28,7 +28,7 @@ class RODDecoder(nn.Module):
         x = self.prelu(self.convt3(x))  # (B, 64, 64, 64) -> (B, 32, 128, 128)
         x = self.prelu(self.convt4(x))  # (B, 32, 128, 128) -> (B, 16, 256, 256)
         x = self.conv(x)                # (B, 16, 256, 256) -> (B, 3, 256, 256)
-        x = x[:, :, 15:239, 18:239]    # (B, 3, 256, 256) -> (B, 3, 224, 221)
+        x = self.downsample(x)            # (B, 3, 256, 256) -> (B, 3, 224, 221)
         x = self.sigmoid(x)
         return x
 
