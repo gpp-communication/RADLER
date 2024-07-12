@@ -13,9 +13,10 @@ class SSLEncoder(nn.Module):
     def __init__(self, image_size=224):
         super(SSLEncoder, self).__init__()
         self.patch_size = 14
-        # TODO: Add pretrained weights
-        self.feature_extractor = create_feature_extractor(torchvision.models.vit_h_14(),
-                                                          return_nodes={"encoder.ln": "features"})
+        self.feature_extractor = create_feature_extractor(
+            torchvision.models.vit_h_14(weights=ViT_H_14_Weights.IMAGENET1K_SWAG_LINEAR_V1),
+            return_nodes={"encoder.ln": "features"}
+        )
 
     def forward(self, image):
         x = self.feature_extractor(image)
@@ -25,7 +26,16 @@ class SSLEncoder(nn.Module):
 
 
 def image_transform():
-    return ViT_H_14_Weights.IMAGENET1K_SWAG_LINEAR_V1.transforms()
+    # return ViT_H_14_Weights.IMAGENET1K_SWAG_LINEAR_V1.transforms()
+    return transforms.Compose([
+        transforms.Resize(224),
+        transforms.CenterCrop(224),
+        transforms.ToTensor(),
+                transforms.RandomApply(torch.nn.ModuleList([
+            transforms.ColorJitter()
+        ]), p=0.8),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    ])
 
 
 def radar_transform():

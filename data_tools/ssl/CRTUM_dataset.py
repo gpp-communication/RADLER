@@ -18,10 +18,10 @@ class CRTUMDataset(Dataset):
         for data_folder in self.data_folders:
             images_folder = os.path.join(root, data_folder, 'IMAGES_0')
             radar_frames_folder = os.path.join(root, data_folder, 'RADAR_RA_H')
-            for image_file in os.listdir(images_folder):
-                images.append(os.path.join(images_folder, image_file))
-            for radar_file in os.listdir(radar_frames_folder):
-                radar_frames.append(os.path.join(radar_frames_folder, radar_file))
+            for image_file in sorted(os.listdir(images_folder)):
+                images.append(os.path.abspath(os.path.join(images_folder, image_file)))
+            for radar_file in sorted(os.listdir(radar_frames_folder)):
+                radar_frames.append(os.path.abspath(os.path.join(radar_frames_folder, radar_file)))
         assert len(images) == len(radar_frames), "Number of images doesn't match number of radar frames"
         self.df = pd.DataFrame(np.column_stack([images, radar_frames]), columns=['images', 'radar_frames'])
 

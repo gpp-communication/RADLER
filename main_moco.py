@@ -17,7 +17,7 @@ import subprocess
 
 import networks.ssl.moco.builder as builder
 from models.ssl_encoder import SSLEncoder, image_transform, radar_transform
-from data_tools.ssl.CRUW_dataset import CRUWDataset
+from data_tools.ssl.CRTUM_dataset import CRTUMDataset
 import torch
 import torch.backends.cudnn as cudnn
 import torch.distributed as dist
@@ -100,6 +100,12 @@ parser.add_argument(
     default='./logs/checkpoints/ssl',
     type=str,
     help="folder path to save checkpoints"
+)
+parser.add_argument(
+    "--save-frequency",
+    default='1',
+    type=int,
+    help="checkpoint file save frequency (default: 1)"
 )
 parser.add_argument(
     "--resume",
@@ -311,7 +317,7 @@ def main_worker(gpu, ngpus_per_node, args):
 
     # Data loading code
     traindir = os.path.join(args.data)
-    train_dataset = CRUWDataset(traindir, img_transform=image_transform(), radar_transform=radar_transform())
+    train_dataset = CRTUMDataset(traindir, img_transform=image_transform(), radar_transform=radar_transform())
 
     if args.distributed:
         train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
@@ -328,8 +334,9 @@ def main_worker(gpu, ngpus_per_node, args):
         drop_last=True,
     )
 
-    with open(os.path.join(args.checkpoints_dir, "train.log"), 'w'):
-        pass
+    args.checkpoints_dir = os.path.join(args.checkpoints_dir,
+                                        '-'.join(['training', str(args.batch_size * ngpus_per_node), str(args.lr), str(args.moco_k)]))
+    os.makedirs(args.checkpoints_dir, exist_ok=True)
 
     for epoch in range(args.start_epoch, args.epochs):
         if args.distributed:
@@ -342,17 +349,30 @@ def main_worker(gpu, ngpus_per_node, args):
         if not args.multiprocessing_distributed or (
             args.multiprocessing_distributed and args.rank % ngpus_per_node == 0
         ):
-            save_checkpoint(
-                {
-                    "epoch": epoch + 1,
-                    "arch": "ViT",
-                    "state_dict": model.state_dict(),
-                    "optimizer": optimizer.state_dict(),
-                },
-                is_best=False,
-                checkpoints_dir=args.checkpoints_dir,
-                filename="checkpoint_{:04d}.pth.tar".format(epoch),
-            )
+            if args.save_frequency == 0:
+                save_checkpoint(
+                    {
+                        "epoch": epoch + 1,
+                        "arch": "ViT",
+                        "state_dict": model.state_dict(),
+                        "optimizer": optimizer.state_dict(),
+                    },
+                    is_best=False,
+                    checkpoints_dir=args.checkpoints_dir,
+                    filename="checkpoint_latest.pth.tar",
+                )
+            elif (epoch + 1) % args.save_frequency == 0:
+                save_checkpoint(
+                    {
+                        "epoch": epoch + 1,
+                        "arch": "ViT",
+                        "state_dict": model.state_dict(),
+                        "optimizer": optimizer.state_dict(),
+                    },
+                    is_best=False,
+                    checkpoints_dir=args.checkpoints_dir,
+                    filename="checkpoint_{:04d}.pth.tar".format(epoch),
+                )
 
 
 def train(train_loader, model, criterion, optimizer, epoch, args):
@@ -445,7 +465,6 @@ class ProgressMeter:
     def display(self, batch):
         entries = [self.prefix + self.batch_fmtstr.format(batch)]
         entries += [str(meter) for meter in self.meters]
-        print("\t".join(entries))
         with open(self.train_log, 'a+') as f_log:
             f_log.write("\t".join(entries))
             f_log.write("\n")
