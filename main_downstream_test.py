@@ -11,22 +11,22 @@ import os
 import random
 import warnings
 import subprocess
+import time
 
 import torch
 import torch.backends.cudnn as cudnn
 import torch.distributed as dist
 import torch.multiprocessing as mp
-import torch.nn as nn
 import torch.nn.parallel
 import torch.optim
 import torch.utils.data
 import torch.utils.data.distributed
 import torchvision.transforms as transforms
-import numpy as np
 
 from networks.downstream import RadarObjectDetector
 from data_tools.downstream import DownstreamDataset
 from models.ssl_encoder import radar_transform
+from networks.downstream.post_processing import post_process_single_frame, write_single_frame_detection_results
 
 parser = argparse.ArgumentParser(description="PyTorch Radar Object Detection Testing with Semantic Depth Tensor")
 parser.add_argument("data", metavar="DIR", help="path to dataset")
@@ -287,14 +287,28 @@ def main_worker(gpu, ngpus_per_node, args):
 
 
 def test(test_loader, model, args):
+    load_tic = time.time()
     for i, (image_paths, radar_data, semantic_depth_tensors, gt_confmaps) in enumerate(test_loader):
+        load_time = time.time() - load_tic
         if args.gpu is not None:
             radar_data = radar_data.cuda(args.gpu, non_blocking=True)
 
         # compute output
+        inference_tic = time.time()
         output_confmap = model(radar_data, semantic_depth_tensors)
+        inference_time = time.time() - inference_tic
 
         # TODO: postprocess output_confmap
+        proc_tic = time.time()
+        for j in range(output_confmap.shape[0]):
+            results = post_process_single_frame(output_confmap[j])
+            write_single_frame_detection_results(results, os.path.join(args.results_dir,
+                                                                       os.path.dirname(image_paths[j]) + '.txt'),
+                                                 os.path.basename(image_paths[j]))
+        proc_time = time.time() - proc_tic
+        print("Testing: Load time: %.4f | Inference time: %.4f | Process time: %.4f" %
+              (load_time, inference_time, proc_time))
+        load_tic = time.time()
 
 
 if __name__ == "__main__":
