@@ -32,6 +32,7 @@ class RadarObjectDetector(nn.Module):
     def __init__(self, pretrained_model, num_class=3, fuse_semantic_depth_feature=False):
         super(RadarObjectDetector, self).__init__()
         self.fuse_semantic_depth_feature = fuse_semantic_depth_feature
+        # TODO: change back to pretrained_encoder() after testing
         self.encoder = SSLEncoder()
         self.decoder = RODDecoder(num_class)
         if self.fuse_semantic_depth_feature:

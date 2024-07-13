@@ -30,15 +30,15 @@ def pol2cart_ramap(rho, phi):
     return x, y
 
 
-def detect_peaks(image, threshold=0.3):
+def detect_peaks(image, search_size, threshold=0.3):
     peaks_row = []
     peaks_col = []
     height, width = image.shape
-    for h in range(1, height - 1):
-        for w in range(2, width - 2):
+    for h in range(search_size - 1, height - (search_size - 1)):
+        for w in range(search_size, width - search_size):
             # this is to make sure "center" is the only one peak in this area
             # TODO: is the size of the area suitable for our data
-            area = image[h - 1:h + 2, w - 2:w + 3]
+            area = image[h - search_size + 1:h + search_size, w - search_size:w + search_size + 1]
             center = image[h, w]
             flag = np.where(area >= center)
             if flag[0].shape[0] == 1 and center > threshold:
@@ -115,10 +115,8 @@ def lnms(obj_dicts_in_class):
 def post_process_single_frame(confmap):
     """
     Post-processing for RODNet
-    :param confmap: predicted confidence map [B, n_class, ramap_r, ramap_a]
-    :param search_size: search other detections within this window (resolution of our system)
-    :param peak_thres: peak threshold
-    :return: [B, win_size, max_dets, 4]
+    :param confmap: predicted confidence map [n_class, ramap_r, ramap_a]
+    :return: [1, max_dets, 4]
     """
     with open('../configs/radar_config.json') as f:
         radar_configs = json.load(f)
@@ -129,6 +127,7 @@ def post_process_single_frame(confmap):
         model_configs = json.load(f)
     max_dets = model_configs['max_dets']
     peak_thres = model_configs['peak_thres']
+    search_size = 2
 
     class_size, height, width = confmap.shape
 
@@ -141,7 +140,7 @@ def post_process_single_frame(confmap):
     for c in range(class_size):
         obj_dicts_in_class = []
         confmap_class = confmap[c, :, :]
-        rowids, colids = detect_peaks(confmap_class, threshold=peak_thres)
+        rowids, colids = detect_peaks(confmap_class, search_size, peak_thres)
 
         for ridx, aidx in zip(rowids, colids):
             rng = rng_grid[ridx]
@@ -170,12 +169,12 @@ def post_process_single_frame(confmap):
 
 
 if __name__ == '__main__':
-    test = torch.randn(1, 3, 224, 224)
+    test = torch.randn(2, 3, 224, 224)
     model = RadarObjectDetector('/Users/yluo/Downloads/checkpoint_0059.pth.tar', fuse_semantic_depth_feature=False)
     model.eval()
     with torch.no_grad():
         output = model(test)
-    output = torch.squeeze(output)
     output = output.detach().cpu().numpy()
-    results = post_process_single_frame(output)
-    print(results)
+    for i in range(output.shape[0]):
+        results = post_process_single_frame(output[i])
+        print(i, results)
