@@ -109,10 +109,10 @@ def lnms(obj_dicts_in_class):
     return detect_mat
 
 
-def post_process_single_frame(confmaps):
+def post_process_single_frame(confmap):
     """
     Post-processing for RODNet
-    :param confmaps: predicted confidence map [B, n_class, win_size, ramap_r, ramap_a]
+    :param confmap: predicted confidence map [B, n_class, ramap_r, ramap_a]
     :param search_size: search other detections within this window (resolution of our system)
     :param peak_thres: peak threshold
     :return: [B, win_size, max_dets, 4]
@@ -127,7 +127,7 @@ def post_process_single_frame(confmaps):
     max_dets = model_configs['max_dets']
     peak_thres = model_configs['peak_thres']
 
-    class_size, height, width = confmaps.shape
+    class_size, height, width = confmap.shape
 
     if class_size != n_class:
         raise TypeError("Wrong class number setting. ")
@@ -137,13 +137,13 @@ def post_process_single_frame(confmaps):
     detect_mat = []
     for c in range(class_size):
         obj_dicts_in_class = []
-        confmap = confmaps[c, :, :]
-        rowids, colids = detect_peaks(confmap, threshold=peak_thres)
+        confmap_class = confmap[c, :, :]
+        rowids, colids = detect_peaks(confmap_class, threshold=peak_thres)
 
         for ridx, aidx in zip(rowids, colids):
             rng = rng_grid[ridx]
             agl = agl_grid[aidx]
-            conf = confmap[ridx, aidx]
+            conf = confmap_class[ridx, aidx]
             obj_dict = dict(
                 frame_id=None,
                 range=rng,
