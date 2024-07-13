@@ -1,26 +1,13 @@
 {
-  "confmap_sigmas": {
-    "car": 32,
-    "cyclist": 25,
-    "pedestrian": 20
-  },
-  "confmap_sigmas_interval": {
-    "pedestrian": [
-      5,
-      15
-    ],
-    "cyclist": [
-      8,
-      20
-    ],
-    "car": [
-      10,
-      30
-    ]
-  },
-  "confmap_length": {
-    "pedestrian": 1.5,
-    "cyclist": 2.5,
-    "car": 3.5
+  "n_classes": 3,
+  "classes": [
+    "pedestrian",
+    "cyclist",
+    "car"
+  ],
+  "sizes": {
+    "pedestrian": 0.5,
+    "cyclist": 1.0,
+    "car": 3.0
   }
 }
