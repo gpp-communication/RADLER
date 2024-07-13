@@ -3,7 +3,7 @@
     "ramap_asize": 221,
     "frame_rate": 15,
     "crop_num_near": 7,
-    "crop_num_far": 24,
+    "crop_num_rear": 24,
     "n_chirps": 255,
     "chirp_ids": [0],
     "sample_freq": 10e6,

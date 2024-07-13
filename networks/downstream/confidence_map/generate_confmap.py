@@ -1,5 +1,7 @@
 import math
 import json
+import os
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -11,16 +13,16 @@ def init_radar_json(n_frames):
     for frame_id in range(n_frames):
         meta_dict = dict(frame_id=frame_id)
         meta_dict['rad_h'] = dict(
-                frame_name=None,
-                n_objects=0,
-                obj_info=dict(
-                    anno_source=None,
-                    categories=[],
-                    centers=[],
-                    center_ids=[],
-                    scores=[]
-                )
+            frame_name=None,
+            n_objects=0,
+            obj_info=dict(
+                anno_source=None,
+                categories=[],
+                centers=[],
+                center_ids=[],
+                scores=[]
             )
+        )
         meta_all.append(meta_dict)
     return meta_all
 
@@ -39,7 +41,10 @@ def get_class_id(class_str, classes):
 def load_anno_txt(txt_path, n_frame, range_grid, angle_grid):
     anno_dict = init_radar_json(n_frame)
     with open(txt_path, 'r') as f:
-        data = f.readlines()
+        static = f.readlines()
+    with open(txt_path.replace('_polar', '_moving_polar'), 'r') as f:
+        moving = f.readlines()
+    data = static + moving
     for line in data:
         frame_id, r, a, class_name = line.rstrip().split()
         frame_id = int(frame_id)
@@ -75,36 +80,21 @@ def add_noise_channel(confmap, ramap_rsize, ramap_asize):
     return confmap_new
 
 
-def visualize_confmap(confmap, pps=None):
-    if pps is None:
-        pps = []
-    if len(confmap.shape) == 2:
-        plt.imshow(confmap, origin='lower', aspect='auto')
-        for pp in pps:
-            plt.scatter(pp[1], pp[0], s=5, c='white')
-        plt.show()
-        return
-    else:
+def visualize_confmap(confmaps, save_path):
+    num = confmaps.shape[0]
+    conf_folder = os.path.join(save_path, 'confmaps')
+    os.makedirs(conf_folder, exist_ok=True)
+    for i in range(num):
+        confmap = confmaps[i]
         n_channel, _, _ = confmap.shape
-    if n_channel == 3:
-        confmap_viz = np.transpose(confmap, (1, 2, 0))
-    elif n_channel > 3:
         confmap_viz = np.transpose(confmap[:3, :, :], (1, 2, 0))
-        if n_channel == 4:
-            confmap_noise = confmap[3, :, :]
-            plt.imshow(confmap_noise, origin='lower', aspect='auto')
-            plt.show()
-    else:
-        print("Warning: wrong shape of confmap!")
-        return
-    plt.imshow(confmap_viz, origin='lower', aspect='auto')
-    for pp in pps:
-        plt.scatter(pp[1], pp[0], s=5, c='white')
-    plt.show()
+        plt.imshow(confmap_viz, origin='lower', aspect='auto')
+        plt.savefig(os.path.join(conf_folder, '%06d.png' % i))
+        plt.cla()
 
 
-def generate_confmaps(metadata_dict, radar_configs, n_class, viz):
-    with open('../configs/confmap_object_config.json') as f:
+def generate_confmaps(metadata_dict, radar_configs, n_class):
+    with open('../configs/object_config.json') as f:
         object_config = json.load(f)
     confmaps = []
     for metadata_frame in metadata_dict:
@@ -121,8 +111,6 @@ def generate_confmaps(metadata_dict, radar_configs, n_class, viz):
             confmap_gt = add_noise_channel(confmap_gt, radar_configs['ramap_rsize'], radar_configs['ramap_asize'])
         assert confmap_gt.shape == (
             n_class + 1, radar_configs['ramap_rsize'], radar_configs['ramap_asize'])
-        if viz:
-            visualize_confmap(confmap_gt)
         confmaps.append(confmap_gt)
     confmaps = np.array(confmaps)
     return confmaps
@@ -162,6 +150,13 @@ def generate_confmap(n_obj, obj_info, radar_configs, config_dict, gaussian_thres
     return confmap
 
 
+def save_confmaps(confmaps, confmaps_dir):
+    for frame_no in range(confmaps.shape[0]):
+        confmap = confmaps[frame_no]
+        confmap_path = os.path.join(confmaps_dir, '%06d.npy' % frame_no)
+        np.save(confmap_path, confmap)
+
+
 if __name__ == '__main__':
     with open('../configs/radar_config.json') as radar_json:
         radar_configs = json.load(radar_json)
@@ -169,7 +164,26 @@ if __name__ == '__main__':
     angle_grids = confmap2ra('angle', radar_configs)
     # print(range_grids)
     # print(angle_grids)
-    meta_dict = load_anno_txt('./2019_04_09_BMS1000.txt', 897, range_grids, angle_grids)
-    # print(meta_dict)
-    confmaps = generate_confmaps(meta_dict, radar_configs, 3, False)
-    print(confmaps.shape)
+    splits = ['test', 'train']
+    sites = ['Arcisstrasse1', 'Arcisstrasse2', 'Arcisstrasse3', 'Arcisstrasse4',
+             'Arcisstrasse5', 'Gabelsbergerstrasse1', 'Gabelsbergerstrasse2']
+    num_frames = {'train': {'Arcisstrasse1': 1137, 'Arcisstrasse2': 667, 'Arcisstrasse3': 1344, 'Arcisstrasse4': 1314,
+                            'Arcisstrasse5': 1414, 'Gabelsbergerstrasse1': 1076, 'Gabelsbergerstrasse2': 907},
+                  'test': {'Arcisstrasse1': 285, 'Arcisstrasse2': 167, 'Arcisstrasse3': 337, 'Arcisstrasse4': 329,
+                           'Arcisstrasse5': 354, 'Gabelsbergerstrasse1': 270, 'Gabelsbergerstrasse2': 227}
+                  }
+    for split in splits:
+        for site in sites:
+            print(split, site)
+            anno_path = ("/Users/yluo/Pictures/CRTUM_new/data_cluster_1_2/downstream/" + split + '/' + site +
+                         '/' + site + '.txt')
+            conf_folder = ("/Users/yluo/Pictures/CRTUM_new/data_cluster_1_2/downstream/" + split + '/' + site +
+                         '/GT_CONFMAPS')
+            os.makedirs(conf_folder, exist_ok=True)
+            meta_dict = load_anno_txt(anno_path, num_frames[split][site], range_grids, angle_grids)
+            # print(meta_dict)
+            print("Load annotations done")
+            confmaps = generate_confmaps(meta_dict, radar_configs, 3)
+            print("Generate confmaps done")
+            # visualize_confmap(confmaps, os.path.dirname(anno_path))
+            save_confmaps(confmaps, confmaps_dir=conf_folder)

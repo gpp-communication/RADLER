@@ -16,8 +16,8 @@ def confmap2ra(name, radar_configs, radordeg='rad'):
     Fs = radar_configs['sample_freq']
     sweepSlope = radar_configs['sweep_slope']
     num_crop_near = radar_configs['crop_num_near']
-    num_crop_far = radar_configs['crop_num_far']
-    fft_Rang = radar_configs['ramap_rsize'] + num_crop_near + num_crop_far
+    num_crop_rear = radar_configs['crop_num_rear']
+    fft_Rang = radar_configs['ramap_rsize'] + num_crop_near + num_crop_rear
     fft_Ang = radar_configs['ramap_asize']
     c = scipy.constants.speed_of_light
 
@@ -28,7 +28,7 @@ def confmap2ra(name, radar_configs, radordeg='rad'):
         # (freq_grid / sweepSlope) * c = range
         # / 2: round trip
         rng_grid = freq_grid * c / sweepSlope / 2
-        rng_grid = rng_grid[num_crop_near:fft_Rang - num_crop_far]
+        rng_grid = rng_grid[num_crop_near: fft_Rang - num_crop_rear]
         return rng_grid
 
     if name == 'angle':
