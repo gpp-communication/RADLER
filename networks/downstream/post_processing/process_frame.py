@@ -36,6 +36,8 @@ def detect_peaks(image, threshold=0.3):
     height, width = image.shape
     for h in range(1, height - 1):
         for w in range(2, width - 2):
+            # this is to make sure "center" is the only one peak in this area
+            # TODO: is the size of the area suitable for our data
             area = image[h - 1:h + 2, w - 2:w + 3]
             center = image[h, w]
             flag = np.where(area >= center)
@@ -103,6 +105,7 @@ def lnms(obj_dicts_in_class):
         del dts[0]
         for pid, pi in enumerate(dts):
             ols = get_ols_btw_objects(p_star, pi)
+            # dts are sorted by the confidence score, so dts[pid] has smaller confidence score --> can be deleted
             if ols > model_configs['ols_thres']:
                 del dts[pid]
 
