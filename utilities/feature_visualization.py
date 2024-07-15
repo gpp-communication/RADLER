@@ -31,7 +31,7 @@ if __name__ == '__main__':
         for file in files:
             radar_paths.append(os.path.join(root, file))
     radar_data = load_radar_data(radar_paths)
-    encoder = pretrained_encoder('/home/stud/luoyu/storage/user/luoyu/projects/Radio-Vision-CityGML/logs/checkpoints/ssl/random-transform-0.8/training-64-1e-05-512/checkpoint_0019.pth.tar')
+    encoder = pretrained_encoder('/home/stud/luoyu/storage/user/luoyu/projects/Radio-Vision-CityGML/logs/checkpoints/ssl/random-transform-0.8/training-64-1e-05-512/checkpoint_0159.pth.tar')
     encoder.eval()
     rearrange = Rearrange('b (p1 p2) d -> b d p1 p2', p1=16, p2=16)
     with torch.no_grad():

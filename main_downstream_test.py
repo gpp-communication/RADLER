@@ -40,16 +40,6 @@ parser.add_argument(
     help="number of data loading workers (default: 32)",
 )
 parser.add_argument(
-    "--epochs", default=100, type=int, metavar="N", help="number of total epochs to run"
-)
-parser.add_argument(
-    "--start-epoch",
-    default=0,
-    type=int,
-    metavar="N",
-    help="manual epoch number (useful on restarts)",
-)
-parser.add_argument(
     "-b",
     "--batch-size",
     default=256,
@@ -58,32 +48,6 @@ parser.add_argument(
     help="mini-batch size (default: 256), this is the total "
          "batch size of all GPUs on the current node when "
          "using Data Parallel or Distributed Data Parallel",
-)
-parser.add_argument(
-    "--lr",
-    "--learning-rate",
-    default=30.0,
-    type=float,
-    metavar="LR",
-    help="initial learning rate",
-    dest="lr",
-)
-parser.add_argument(
-    "--schedule",
-    default=[60, 80],
-    nargs="*",
-    type=int,
-    help="learning rate schedule (when to drop lr by a ratio)",
-)
-parser.add_argument("--momentum", default=0.9, type=float, metavar="M", help="momentum")
-parser.add_argument(
-    "--wd",
-    "--weight-decay",
-    default=0.0,
-    type=float,
-    metavar="W",
-    help="weight decay (default: 0.)",
-    dest="weight_decay",
 )
 parser.add_argument(
     "-p",
@@ -132,6 +96,10 @@ parser.add_argument(
     type=str,
     help="folder path to save results"
 )
+parser.add_argument(
+    "--fuse-semantic-depth-tensor", default=False, action="store_true",
+    help="whether to fuse semantic depth tensor"
+)
 
 
 def main():
@@ -174,7 +142,6 @@ def main():
 
 
 def main_worker(gpu, ngpus_per_node, args):
-    global fuse_semantic_depth_tensor
     args.gpu = gpu
 
     # suppress printing if not master
@@ -243,7 +210,6 @@ def main_worker(gpu, ngpus_per_node, args):
             loc = "cuda:{}".format(args.gpu)
             checkpoint = torch.load(args.pretrained, map_location=loc)
         model.load_state_dict(checkpoint["state_dict"])
-        fuse_semantic_depth_tensor = checkpoint["fuse_semantic_depth_tensor"]
         print(
             "=> loaded checkpoint '{}'".format(args.pretrained)
         )
@@ -251,8 +217,8 @@ def main_worker(gpu, ngpus_per_node, args):
         print("=> no checkpoint found at '{}'".format(args.pretrained))
 
     args.results_dir = os.path.join(args.results_dir,
-                                    '-'.join(['testing', str(args.batch_size * ngpus_per_node), str(args.lr),
-                                              'fuse_semantic_depth_tensor_' + str(fuse_semantic_depth_tensor)
+                                    '-'.join(['testing', str(args.batch_size * ngpus_per_node),
+                                              'fuse_semantic_depth_tensor_' + str(args.fuse_semantic_depth_tensor)
                                               ]))
     os.makedirs(args.results_dir, exist_ok=True)
 
@@ -265,25 +231,21 @@ def main_worker(gpu, ngpus_per_node, args):
     test_dataset = DownstreamDataset(test_dataset_dir, radar_transforms, semantic_depth_transforms)
 
     if args.distributed:
-        train_sampler = torch.utils.data.distributed.DistributedSampler(test_dataset)
+        test_sampler = torch.utils.data.distributed.DistributedSampler(test_dataset)
     else:
-        train_sampler = None
+        test_sampler = None
 
     test_loader = torch.utils.data.DataLoader(
         test_dataset,
         batch_size=args.batch_size,
-        shuffle=(train_sampler is None),
+        shuffle=(test_sampler is None),
         num_workers=args.workers,
         pin_memory=True,
-        sampler=train_sampler,
+        sampler=test_sampler,
     )
 
-    for epoch in range(args.start_epoch, args.epochs):
-        if args.distributed:
-            train_sampler.set_epoch(epoch)
-
-        # train for one epoch
-        test(test_loader, model, args)
+    # train for one epoch
+    test(test_loader, model, args)
 
 
 def test(test_loader, model, args):

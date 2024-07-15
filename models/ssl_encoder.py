@@ -31,8 +31,8 @@ def image_transform():
         transforms.Resize(224),
         transforms.CenterCrop(224),
         transforms.ToTensor(),
-                transforms.RandomApply(torch.nn.ModuleList([
-            transforms.ColorJitter()
+        transforms.RandomApply(torch.nn.ModuleList([
+            transforms.ColorJitter(0.2, 0.2, 0.2, 0.2)
         ]), p=0.8),
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])
