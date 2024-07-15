@@ -242,7 +242,6 @@ def main_worker(gpu, ngpus_per_node, args):
             loc = "cuda:{}".format(args.gpu)
             checkpoint = torch.load(args.pretrained, map_location=loc)
         model.load_state_dict(checkpoint["state_dict"])
-        # TODO: load this option from the checkout --> change the train.py to store this option in the checkpoint file
         fuse_semantic_depth_tensor = checkpoint["fuse_semantic_depth_tensor"]
         print(
             "=> loaded checkpoint '{}'".format(args.pretrained)
