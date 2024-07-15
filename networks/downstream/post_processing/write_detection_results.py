@@ -2,7 +2,7 @@ import json
 import torch
 
 from networks.downstream import RadarObjectDetector
-from process_frame import post_process_single_frame
+from networks.downstream.post_processing import post_process_single_frame
 
 
 def get_class_name(class_id, classes):

@@ -1,7 +1,18 @@
+import json
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
+from matplotlib.font_manager import FontProperties
+
+from networks.downstream.post_processing import get_class_name, post_process_single_frame
+
+fp = FontProperties(fname=r"assets/fontawesome-free-5.12.0-desktop/otfs/solid-900.otf")
+symbols = {
+    'pedestrian': "\uf554",
+    'cyclist': "\uf84a",
+    'car': "\uf1b9",
+}
 
 
 def visualize_training(fig_name, img_path, radar_data, output_confmap, gt_confmap):
@@ -27,6 +38,62 @@ def visualize_training(fig_name, img_path, radar_data, output_confmap, gt_confma
     plt.close(fig)
 
 
+def visualize_test_img(fig_name, img_path, input_radar, confmap_pred, confmap_gt, res_final, viz=False,
+                       sybl=False):
+    fig = plt.figure(figsize=(8, 8))
+    max_dets, _ = res_final.shape
+    with open('../configs/object_config.json', 'r') as f:
+        object_cfg = json.load(f)
+    classes = object_cfg['classes']
+
+    img_data = Image.open(img_path).convert('RGB')
+
+    fig.add_subplot(2, 2, 1)
+    plt.imshow(img_data)
+    plt.axis('off')
+    plt.title("Image")
+
+    fig.add_subplot(2, 2, 2)
+    plt.imshow(input_radar, origin='lower', aspect='auto')
+    plt.axis('off')
+    plt.title("RA Heatmap")
+
+    fig.add_subplot(2, 2, 3)
+    confmap_pred = np.transpose(confmap_pred, (1, 2, 0))
+    confmap_pred[confmap_pred < 0] = 0
+    confmap_pred[confmap_pred > 1] = 1
+    plt.imshow(confmap_pred, vmin=0, vmax=1, origin='lower', aspect='auto')
+    for d in range(max_dets):
+        cla_id = int(res_final[d, 0])
+        if cla_id == -1:
+            continue
+        row_id = res_final[d, 1]
+        col_id = res_final[d, 2]
+        conf = res_final[d, 3]
+        conf = 1.0 if conf > 1 else conf
+        cla_str = get_class_name(cla_id, classes)
+        if sybl:
+            text = symbols[cla_str]
+            plt.text(col_id, row_id + 3, text, fontproperties=fp, color='white', size=20, ha="center")
+        else:
+            plt.scatter(col_id, row_id, s=10, c='white')
+            text = cla_str + '\n%.2f' % conf
+            plt.text(col_id + 5, row_id, text, color='white', fontsize=10)
+    plt.axis('off')
+    plt.title("RODNet Detection")
+
+    fig.add_subplot(2, 2, 4)
+    confmap_gt = np.transpose(confmap_gt, (1, 2, 0))
+    plt.imshow(confmap_gt, vmin=0, vmax=1, origin='lower', aspect='auto')
+    plt.axis('off')
+    plt.title("Ground Truth")
+
+    plt.savefig(fig_name)
+    if viz:
+        plt.pause(0.1)
+    plt.clf()
+
+
 if __name__ == '__main__':
     fig_name = 'test'
     img_path = '/Users/yluo/Project/Radio-Vision-CityGML/datasets/test/test/IMAGES_0/000000.png'
@@ -34,5 +101,6 @@ if __name__ == '__main__':
     gt_confmap_path = '/Users/yluo/Project/Radio-Vision-CityGML/datasets/test/test/GT_CONFMAPS/000000.npy'
     radar_data = np.load(radar_path)
     output_confmap = torch.rand(3, 224, 221)
+    results = post_process_single_frame(output_confmap)
     gt_confmap = np.load(gt_confmap_path)
-    visualize_training(fig_name, img_path, radar_data, output_confmap, gt_confmap[:3, :, :,])
+    visualize_test_img(fig_name, img_path, radar_data, output_confmap, gt_confmap[:3, :, :,], results)

@@ -27,6 +27,7 @@ from networks.downstream import RadarObjectDetector
 from data_tools.downstream import DownstreamDataset
 from models.ssl_encoder import radar_transform
 from networks.downstream.post_processing import post_process_single_frame, write_single_frame_detection_results
+from networks.downstream.visualization import visualize_test_img
 
 parser = argparse.ArgumentParser(description="PyTorch Radar Object Detection Testing with Semantic Depth Tensor")
 parser.add_argument("data", metavar="DIR", help="path to dataset")
@@ -303,6 +304,8 @@ def test(test_loader, model, args):
             write_single_frame_detection_results(results, os.path.join(args.results_dir,
                                                                        os.path.dirname(image_paths[j]) + '.txt'),
                                                  os.path.basename(image_paths[j]))
+            visualize_test_img(os.path.join(args.results_dir, os.path.dirname(image_paths[j]) + '.png'), image_paths[j],
+                               radar_data[j], output_confmap[j], gt_confmaps[j], results)
         proc_time = time.time() - proc_tic
         print("Testing: Load time: %.4f | Inference time: %.4f | Process time: %.4f" %
               (load_time, inference_time, proc_time))
