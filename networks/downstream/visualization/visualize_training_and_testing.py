@@ -42,7 +42,7 @@ def visualize_test_img(fig_name, img_path, input_radar, confmap_pred, confmap_gt
                        sybl=False):
     fig = plt.figure(figsize=(8, 8))
     max_dets, _ = res_final.shape
-    with open('../configs/object_config.json', 'r') as f:
+    with open('/home/stud/luoyu/storage/user/luoyu/projects/Radio-Vision-CityGML/networks/downstream/configs/object_config.json', 'r') as f:
         object_cfg = json.load(f)
     classes = object_cfg['classes']
 

@@ -18,7 +18,7 @@ def get_class_name(class_id, classes):
 
 def write_single_frame_detection_results(results, results_file, frame_id):
     max_dets, _ = results.shape
-    with open('../configs/object_config.json', 'r') as f:
+    with open('/home/stud/luoyu/storage/user/luoyu/projects/Radio-Vision-CityGML/networks/downstream/configs/object_config.json', 'r') as f:
         object_cfg = json.load(f)
     classes = object_cfg['classes']
     with open(results_file, 'a+') as f:
