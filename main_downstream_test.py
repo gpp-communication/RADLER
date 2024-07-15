@@ -12,6 +12,7 @@ import random
 import warnings
 import subprocess
 import time
+import numpy as np
 
 import torch
 import torch.backends.cudnn as cudnn
@@ -261,18 +262,24 @@ def test(test_loader, model, args):
         with torch.no_grad():
             output_confmap = model(radar_data, semantic_depth_tensors)
         inference_time = time.time() - inference_tic
-
+        output_confmap = output_confmap.detach().cpu().numpy()
         proc_tic = time.time()
         for j in range(output_confmap.shape[0]):
             results = post_process_single_frame(output_confmap[j])
-            write_single_frame_detection_results(results, os.path.join(args.results_dir,
-                                                                       os.path.dirname(image_paths[j]) + '.txt'),
-                                                 os.path.basename(image_paths[j]))
-            visualize_test_img(os.path.join(args.results_dir, os.path.dirname(image_paths[j]) + '.png'), image_paths[j],
-                               radar_data[j], output_confmap[j], gt_confmaps[j], results)
+            folder = os.path.join(os.path.join(args.results_dir, os.path.basename(os.path.dirname(os.path.dirname(image_paths[j])))))
+            os.makedirs(folder, exist_ok=True)
+            write_single_frame_detection_results(results, os.path.join(args.results_dir, os.path.basename(os.path.dirname(os.path.dirname(image_paths[j]))) + '.txt'),
+                                                 os.path.basename(image_paths[j]).rstrip('.png'))
+            image_path = image_paths[j]
+            radar_path = image_path.replace('IMAGES_0', 'RADAR_RA_H').replace('png', 'npy')
+            gt_confmap_path = image_path.replace('IMAGES_0', 'GT_CONFMAPS').replace('png', 'npy')
+            raw_radar_data = np.load(radar_path)
+            gt_confmap = np.load(gt_confmap_path)
+            test_img_path = os.path.join(folder, os.path.basename(image_path))
+            visualize_test_img(test_img_path, image_path, raw_radar_data, output_confmap[j], gt_confmap[:3, :, :], results)
         proc_time = time.time() - proc_tic
-        print("Testing: Load time: %.4f | Inference time: %.4f | Process time: %.4f" %
-              (load_time, inference_time, proc_time))
+        print("Testing: step:%d/%d | Load time: %.4f | Inference time: %.4f | Process time: %.4f" %
+              (i, 2000 / args.batch_size, load_time, inference_time, proc_time))
         load_tic = time.time()
 
 

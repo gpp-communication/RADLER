@@ -7,13 +7,6 @@ from matplotlib.font_manager import FontProperties
 
 from networks.downstream.post_processing import get_class_name, post_process_single_frame
 
-fp = FontProperties(fname=r"assets/fontawesome-free-5.12.0-desktop/otfs/solid-900.otf")
-symbols = {
-    'pedestrian': "\uf554",
-    'cyclist': "\uf84a",
-    'car': "\uf1b9",
-}
-
 
 def visualize_training(fig_name, img_path, radar_data, output_confmap, gt_confmap):
     fig = plt.figure(figsize=(12, 12))
@@ -38,15 +31,14 @@ def visualize_training(fig_name, img_path, radar_data, output_confmap, gt_confma
     plt.close(fig)
 
 
-def visualize_test_img(fig_name, img_path, input_radar, confmap_pred, confmap_gt, res_final, viz=False,
-                       sybl=False):
-    fig = plt.figure(figsize=(8, 8))
+def visualize_test_img(fig_name, img_path, radar_data, output_confmap, gt_confmap, res_final):
     max_dets, _ = res_final.shape
     with open('/home/stud/luoyu/storage/user/luoyu/projects/Radio-Vision-CityGML/networks/downstream/configs/object_config.json', 'r') as f:
         object_cfg = json.load(f)
     classes = object_cfg['classes']
 
-    img_data = Image.open(img_path).convert('RGB')
+    fig = plt.figure(figsize=(12, 12))
+    img_data = Image.open(img_path)
 
     fig.add_subplot(2, 2, 1)
     plt.imshow(img_data)
@@ -54,15 +46,14 @@ def visualize_test_img(fig_name, img_path, input_radar, confmap_pred, confmap_gt
     plt.title("Image")
 
     fig.add_subplot(2, 2, 2)
-    plt.imshow(input_radar, origin='lower', aspect='auto')
+    plt.imshow(radar_data, origin='lower', aspect='auto')
     plt.axis('off')
     plt.title("RA Heatmap")
 
     fig.add_subplot(2, 2, 3)
-    confmap_pred = np.transpose(confmap_pred, (1, 2, 0))
-    confmap_pred[confmap_pred < 0] = 0
-    confmap_pred[confmap_pred > 1] = 1
-    plt.imshow(confmap_pred, vmin=0, vmax=1, origin='lower', aspect='auto')
+    output_confmap = np.transpose(output_confmap, (1, 2, 0))
+    output_confmap[output_confmap < 0] = 0
+    plt.imshow(output_confmap, vmin=0, vmax=1, origin='lower', aspect='auto')
     for d in range(max_dets):
         cla_id = int(res_final[d, 0])
         if cla_id == -1:
@@ -72,26 +63,20 @@ def visualize_test_img(fig_name, img_path, input_radar, confmap_pred, confmap_gt
         conf = res_final[d, 3]
         conf = 1.0 if conf > 1 else conf
         cla_str = get_class_name(cla_id, classes)
-        if sybl:
-            text = symbols[cla_str]
-            plt.text(col_id, row_id + 3, text, fontproperties=fp, color='white', size=20, ha="center")
-        else:
-            plt.scatter(col_id, row_id, s=10, c='white')
-            text = cla_str + '\n%.2f' % conf
-            plt.text(col_id + 5, row_id, text, color='white', fontsize=10)
+        plt.scatter(col_id, row_id, s=10, c='white')
+        text = cla_str + '\n%.2f' % conf
+        plt.text(col_id + 5, row_id, text, color='white', fontsize=10)
     plt.axis('off')
-    plt.title("RODNet Detection")
+    plt.title("Downstream Detection")
 
     fig.add_subplot(2, 2, 4)
-    confmap_gt = np.transpose(confmap_gt, (1, 2, 0))
+    confmap_gt = np.transpose(gt_confmap, (1, 2, 0))
     plt.imshow(confmap_gt, vmin=0, vmax=1, origin='lower', aspect='auto')
     plt.axis('off')
     plt.title("Ground Truth")
 
     plt.savefig(fig_name)
-    if viz:
-        plt.pause(0.1)
-    plt.clf()
+    plt.close(fig)
 
 
 if __name__ == '__main__':

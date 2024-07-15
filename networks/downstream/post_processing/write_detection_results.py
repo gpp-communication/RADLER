@@ -29,7 +29,7 @@ def write_single_frame_detection_results(results, results_file, frame_id):
             row_id = results[d, 1]
             col_id = results[d, 2]
             conf = results[d, 3]
-            f.write("%d %s %d %d %.4f\n" % (frame_id, get_class_name(cla_id, classes), row_id, col_id, conf))
+            f.write("%d %s %d %d %.4f\n" % (int(frame_id), get_class_name(cla_id, classes), row_id, col_id, conf))
 
 
 if __name__ == '__main__':
