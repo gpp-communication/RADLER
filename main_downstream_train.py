@@ -319,7 +319,6 @@ def main_worker(gpu, ngpus_per_node, args):
                     "arch": "Radar Object Detector",
                     "state_dict": model.state_dict(),
                     "optimizer": optimizer.state_dict(),
-                    "fuse_semantic_depth_tensor": args.fuse_semantic_depth_tensor,
                 },
                 is_best=False,
                 checkpoints_dir=args.checkpoints_dir,
