@@ -256,8 +256,10 @@ def test(test_loader, model, args):
             radar_data = radar_data.cuda(args.gpu, non_blocking=True)
 
         # compute output
+        model.eval()
         inference_tic = time.time()
-        output_confmap = model(radar_data, semantic_depth_tensors)
+        with torch.no_grad():
+            output_confmap = model(radar_data, semantic_depth_tensors)
         inference_time = time.time() - inference_tic
 
         proc_tic = time.time()
