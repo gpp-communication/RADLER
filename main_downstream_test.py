@@ -298,7 +298,6 @@ def test(test_loader, model, args):
         output_confmap = model(radar_data, semantic_depth_tensors)
         inference_time = time.time() - inference_tic
 
-        # TODO: postprocess output_confmap
         proc_tic = time.time()
         for j in range(output_confmap.shape[0]):
             results = post_process_single_frame(output_confmap[j])

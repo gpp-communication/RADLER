@@ -16,7 +16,6 @@ class CRUWDataset(CRTUMDataset):
         radar_frame = np.sqrt(radar_frame[:, :, 0]**2 + radar_frame[:, :, 1]**2)
         radar_frame = np.expand_dims(radar_frame, 2)
         radar_frame = np.repeat(radar_frame, 3, 2)
-        # TODO: 128 x 128, which one is the range, and which one is the angle
         # radar_frame = np.transpose(radar_frame, (2, 0, 1))
         radar_frame = np.pad(radar_frame, ((48, 48), (48, 48), (0, 0)), 'constant')
         if self.image_transform is not None:

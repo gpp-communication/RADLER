@@ -28,11 +28,9 @@ class MoCo(nn.Module):
         self.T = T
         # create the encoders
         # num_classes is the output fc dimension
-        # TODO: 1 radar frame --> multiple images; radar = query, images = keys
         self.encoder_q = base_encoder()
         self.encoder_k = base_encoder()
 
-        # TODO: fix the dim_mlp calculation when using mlp for ViT
         dim_mlp = 327680
         self.mlp_q = nn.Sequential(
             nn.Flatten(), nn.Linear(dim_mlp, dim), nn.ReLU()

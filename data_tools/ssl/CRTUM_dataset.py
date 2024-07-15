@@ -31,7 +31,7 @@ class CRTUMDataset(Dataset):
     def __getitem__(self, idx):
         img_path = self.df['images'][idx]
         radar_path = self.df['radar_frames'][idx]
-        image = Image.open(img_path).convert('RGB')  # TODO: check the RGB order in Image
+        image = Image.open(img_path).convert('RGB')
         radar_frame = np.load(radar_path)
         radar_frame = np.expand_dims(radar_frame, 2)
         radar_frame = np.repeat(radar_frame, 3, 2)

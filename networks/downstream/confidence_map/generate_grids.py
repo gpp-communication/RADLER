@@ -12,7 +12,6 @@ def confmap2ra(name, radar_configs, radordeg='rad'):
     :param radordeg: choose from radius or degree for angle grid
     :return: mapping grids
     """
-    # TODO: add more args for different network settings
     Fs = radar_configs['sample_freq']
     sweepSlope = radar_configs['sweep_slope']
     num_crop_near = radar_configs['crop_num_near']
