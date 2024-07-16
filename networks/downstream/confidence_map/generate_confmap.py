@@ -94,7 +94,7 @@ def visualize_confmap(confmaps, save_path):
 
 
 def generate_confmaps(metadata_dict, radar_configs, n_class):
-    with open('../configs/object_config.json') as f:
+    with open('../configs/confmap_object_config.json') as f:
         object_config = json.load(f)
     confmaps = []
     for metadata_frame in metadata_dict:
