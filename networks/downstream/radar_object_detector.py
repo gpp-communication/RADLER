@@ -32,8 +32,7 @@ class RadarObjectDetector(nn.Module):
     def __init__(self, pretrained_model, num_class=3, fuse_semantic_depth_feature=False):
         super(RadarObjectDetector, self).__init__()
         self.fuse_semantic_depth_feature = fuse_semantic_depth_feature
-        # TODO: change back to pretrained_encoder() after testing
-        self.encoder = SSLEncoder()
+        self.encoder = pretrained_encoder('/home/stud/luoyu/storage/user/luoyu/projects/Radio-Vision-CityGML/logs/checkpoints/ssl/no-colorjitter/training-64-1e-05-512/checkpoint_0159.pth.tar')
         self.decoder = RODDecoder(num_class)
         if self.fuse_semantic_depth_feature:
             self.semantic_depth_feature_extractor = SemanticDepthFeatureExtractor()
