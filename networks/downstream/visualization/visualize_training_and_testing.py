@@ -3,7 +3,6 @@ import torch
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
-from matplotlib.font_manager import FontProperties
 
 from networks.downstream.post_processing import get_class_name, post_process_single_frame
 
@@ -16,7 +15,11 @@ def visualize_training(fig_name, img_path, radar_data, output_confmap, gt_confma
     plt.imshow(img_data)
 
     fig.add_subplot(2, 2, 2)
-    plt.imshow(radar_data, origin='lower', aspect='auto')
+    radar_data[radar_data == 0] = 1
+    data = np.log10(radar_data) * 20
+    max_value = np.max(data)
+    im = plt.imshow(data, origin='lower', aspect='auto', cmap='jet')
+    im.set_clim(max_value - 30, max_value)
 
     fig.add_subplot(2, 2, 3)
     output_confmap = np.transpose(output_confmap, (1, 2, 0))
@@ -46,7 +49,11 @@ def visualize_test_img(fig_name, img_path, radar_data, output_confmap, gt_confma
     plt.title("Image")
 
     fig.add_subplot(2, 2, 2)
-    plt.imshow(radar_data, origin='lower', aspect='auto')
+    radar_data[radar_data == 0] = 1
+    data = np.log10(radar_data) * 20
+    max_value = np.max(data)
+    im = plt.imshow(data, origin='lower', aspect='auto', cmap='jet')
+    im.set_clim(max_value - 30, max_value)
     plt.axis('off')
     plt.title("RA Heatmap")
 
