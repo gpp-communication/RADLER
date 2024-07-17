@@ -6,7 +6,7 @@ class RODDecoder(nn.Module):
 
     def __init__(self, n_class):
         super(RODDecoder, self).__init__()
-        self.convt1 = nn.ConvTranspose2d(in_channels=256, out_channels=128,
+        self.convt1 = nn.ConvTranspose2d(in_channels=257, out_channels=128,
                                          kernel_size=(6, 6), stride=(2, 2), padding=(2, 2))
         self.convt2 = nn.ConvTranspose2d(in_channels=128, out_channels=64,
                                          kernel_size=(6, 6), stride=(2, 2), padding=(2, 2))
