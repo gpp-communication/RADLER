@@ -52,8 +52,7 @@ class RadarObjectDetector(nn.Module):
             assert semantic_depth_tensor is not None, \
                 "Semantic depth tensor should not be None when feature fusion is desired"
             semantic_depth_feature = self.semantic_depth_feature_extractor(semantic_depth_tensor)
-            # TODO: another normalization for both x and semantic_depth feature before addition?
-            x = x + semantic_depth_feature  # Add the semantic depth feature to every channel of the radar frame feature
+            x = torch.concat([x, semantic_depth_feature], dim=1)  # Concat semantic depth feature with the radar frame feature together
             x = self.norm(x)
         return self.decoder(x)
 
