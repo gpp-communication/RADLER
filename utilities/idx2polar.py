@@ -45,10 +45,13 @@ if __name__ == '__main__':
     splits = ['train', 'test']
     sites = ['Arcisstrasse1', 'Arcisstrasse2', 'Arcisstrasse3', 'Arcisstrasse4',
              'Arcisstrasse5', 'Gabelsbergerstrasse1', 'Gabelsbergerstrasse2']
-    for split in splits:
-        for site in sites:
-            print(split, site)
-            idx2polar(
-                '/Users/yluo/Pictures/CRTUM_new/data_cluster_1_2/downstream/' + split + '/' + site + '/Annotations_moving.txt')
-            idx2polar(
-                '/Users/yluo/Pictures/CRTUM_new/data_cluster_1_2/downstream/' + split + '/' + site + '/Annotations.txt')
+    # for split in splits:
+    #     for site in sites:
+    #         print(split, site)
+    #         idx2polar(
+    #             '/Users/yluo/Pictures/CRTUM_new/data_cluster_1_2/downstream/' + split + '/' + site + '/Annotations_moving.txt')
+    #         idx2polar(
+    #             '/Users/yluo/Pictures/CRTUM_new/data_cluster_1_2/downstream/' + split + '/' + site + '/Annotations.txt')
+
+    for site in sites:
+        idx2polar_res('/Users/yluo/Downloads/res/' + site + '.txt')
