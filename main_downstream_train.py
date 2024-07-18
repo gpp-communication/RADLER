@@ -238,7 +238,7 @@ def main_worker(gpu, ngpus_per_node, args):
             args.batch_size = int(args.batch_size / ngpus_per_node)
             args.workers = int((args.workers + ngpus_per_node - 1) / ngpus_per_node)
             model = torch.nn.parallel.DistributedDataParallel(
-                model, device_ids=[args.gpu]
+                model, device_ids=[args.gpu], find_unused_parameters=True
             )
         else:
             model.cuda()

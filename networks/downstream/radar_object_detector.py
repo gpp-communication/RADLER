@@ -36,12 +36,13 @@ class RadarObjectDetector(nn.Module):
             self.encoder = pretrained_encoder(pretrained_model)
         elif mode == 'test':
             self.encoder = SSLEncoder()
-        self.decoder = RODDecoder(num_class)
+        self.decoder = RODDecoder(num_class, self.fuse_semantic_depth_feature)
         if self.fuse_semantic_depth_feature:
             self.semantic_depth_feature_extractor = SemanticDepthFeatureExtractor()
         self.feature_reshape = Rearrange('b (p1 p2) d -> b d p1 p2', p1=16, p2=16)
         self.channel_resize = nn.Conv2d(1280, 256, kernel_size=1, stride=1, padding=0)
         self.norm = nn.BatchNorm2d(256)
+        self.norm_concat = nn.BatchNorm2d(257)
 
         for param in self.encoder.parameters():
             param.requires_grad = False
@@ -56,7 +57,7 @@ class RadarObjectDetector(nn.Module):
                 "Semantic depth tensor should not be None when feature fusion is desired"
             semantic_depth_feature = self.semantic_depth_feature_extractor(semantic_depth_tensor)
             x = torch.concat([x, semantic_depth_feature], dim=1)  # Concat semantic depth feature with the radar frame feature together
-            x = self.norm(x)
+            x = self.norm_concat(x)
         return self.decoder(x)
 
     def train(self: T, mode: bool = True) -> T:
