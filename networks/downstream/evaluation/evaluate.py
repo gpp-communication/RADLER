@@ -6,7 +6,7 @@ from networks.downstream.post_processing import get_ols_btw_objects
 
 
 def read_gt_txt(txt_path, n_frame, object_cfg):
-    n_class = object_cfg['n_class']
+    n_class = object_cfg['n_classes']
     classes = object_cfg['classes']
     with open(txt_path, 'r') as f:
         data = f.readlines()
@@ -47,7 +47,7 @@ def read_gt_txt(txt_path, n_frame, object_cfg):
 
 
 def read_sub_txt(txt_path, n_frame, object_cfg):
-    n_class = object_cfg['n_class']
+    n_class = object_cfg['n_classes']
     classes = object_cfg['classes']
     with open(txt_path, 'r') as f:
         data = f.readlines()
@@ -161,7 +161,7 @@ def evaluate_img(gts_dict, dts_dict, imgId, catId, olss_dict, olsThrs, recThrs, 
 
 
 def accumulate(evalImgs, n_frame, olsThrs, recThrs, object_cfg, log=True):
-    n_class = object_cfg['n_class']
+    n_class = object_cfg['n_classes']
     classes = object_cfg['classes']
 
     T = len(olsThrs)
@@ -195,8 +195,8 @@ def accumulate(evalImgs, n_frame, olsThrs, recThrs, object_cfg, log=True):
 
         tps = np.array(dtm, dtype=bool)
         fps = np.logical_not(dtm)
-        tp_sum = np.cumsum(tps, axis=1).astype(dtype=np.float)
-        fp_sum = np.cumsum(fps, axis=1).astype(dtype=np.float)
+        tp_sum = np.cumsum(tps, axis=1)
+        fp_sum = np.cumsum(fps, axis=1)
 
         for t, (tp, fp) in enumerate(zip(tp_sum, fp_sum)):
             tp = np.array(tp)
@@ -241,7 +241,7 @@ def accumulate(evalImgs, n_frame, olsThrs, recThrs, object_cfg, log=True):
 
 
 def summarize(eval, olsThrs, object_cfg, gl=True):
-    n_class = object_cfg['n_class']
+    n_class = object_cfg['n_classes']
 
     def _summarize(eval=eval, ap=1, olsThr=None):
         object_counts = eval['object_counts']
@@ -330,8 +330,7 @@ def evaluate(data_path, submit_dir, truth_dir):
     for seqid, (sub_name, gt_name) in enumerate(zip(sub_names, gt_names)):
         gt_path = os.path.join(truth_dir, gt_name)
         sub_path = os.path.join(submit_dir, sub_name)
-        n_frame = len(os.listdir(os.path.join(data_path, gt_name.rstrip('.txt'))))
-
+        n_frame = len(os.listdir(os.path.join(data_path, gt_name.rstrip('.txt'), 'IMAGES_0')))
         gt_dets = read_gt_txt(gt_path, n_frame, object_config)
         sub_dets = read_sub_txt(sub_path, n_frame, object_config)
 
@@ -348,3 +347,11 @@ def evaluate(data_path, submit_dir, truth_dir):
     stats = summarize(eval, olsThrs, object_config, gl=False)
     print("AP_total: %.4f" % (stats[0] * 100))
     print("AR_total: %.4f" % (stats[1] * 100))
+
+
+if __name__ == '__main__':
+    data_path = '/Users/yluo/Pictures/CRTUM_new/data_cluster_1_2/downstream/test'
+    # sub_path = '/Users/yluo/Downloads/res/res'
+    sub_path = '/Users/yluo/Downloads/res/rod-res'
+    truth_dir = '/Users/yluo/Pictures/CRTUM_new/data_cluster_1_2/downstream/annotations/test'
+    evaluate(data_path, sub_path, truth_dir)

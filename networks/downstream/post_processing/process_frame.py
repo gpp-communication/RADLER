@@ -49,7 +49,7 @@ def detect_peaks(image, search_size, threshold=0.3):
 
 
 def get_ols_btw_objects(obj1, obj2):
-    with open('/home/stud/luoyu/storage/user/luoyu/projects/Radio-Vision-CityGML/networks/downstream/configs/object_config.json') as f:
+    with open('../configs/object_config.json') as f:
         object_cfg = json.load(f)
 
     classes = object_cfg["classes"]

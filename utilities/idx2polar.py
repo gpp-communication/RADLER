@@ -35,7 +35,7 @@ def idx2polar_res(res_file):
                         'confidence_value': float(confidence_value)}
             objects.append(obj_dict)
 
-    with open(res_file.replace('.txt', '_polar.txt'), 'w') as f:
+    with open(res_file, 'w') as f:
         for obj in objects:
             f.write('%s %.4f %.4f %s %.4f\n' % (
             obj['frame_no'], obj['range'], obj['angle'], obj['object_class'], obj['confidence_value']))
@@ -45,10 +45,13 @@ if __name__ == '__main__':
     splits = ['train', 'test']
     sites = ['Arcisstrasse1', 'Arcisstrasse2', 'Arcisstrasse3', 'Arcisstrasse4',
              'Arcisstrasse5', 'Gabelsbergerstrasse1', 'Gabelsbergerstrasse2']
-    for split in splits:
-        for site in sites:
-            print(split, site)
-            idx2polar(
-                '/Users/yluo/Pictures/CRTUM_new/data_cluster_1_2/downstream/' + split + '/' + site + '/Annotations_moving.txt')
-            idx2polar(
-                '/Users/yluo/Pictures/CRTUM_new/data_cluster_1_2/downstream/' + split + '/' + site + '/Annotations.txt')
+    # for split in splits:
+    #     for site in sites:
+    #         print(split, site)
+    #         idx2polar(
+    #             '/Users/yluo/Pictures/CRTUM_new/data_cluster_1_2/downstream/' + split + '/' + site + '/Annotations_moving.txt')
+    #         idx2polar(
+    #             '/Users/yluo/Pictures/CRTUM_new/data_cluster_1_2/downstream/' + split + '/' + site + '/Annotations.txt')
+
+    for site in sites:
+        idx2polar_res('/Users/yluo/Downloads/res/rod-res/' + site + '.txt')
