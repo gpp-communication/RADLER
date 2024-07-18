@@ -223,7 +223,7 @@ def main_worker(gpu, ngpus_per_node, args):
         )
     # create model
     print("=> creating model '{}'".format("Radar Object Detector"))
-    model = RadarObjectDetector(args.pretrained, 3, args.fuse_semantic_depth_tensor)
+    model = RadarObjectDetector(args.pretrained, 'train', 3, args.fuse_semantic_depth_tensor)
 
     if args.distributed:
         # For multiprocessing distributed, DistributedDataParallel constructor
