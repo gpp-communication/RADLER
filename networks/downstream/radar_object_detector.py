@@ -42,7 +42,7 @@ class RadarObjectDetector(nn.Module):
         self.feature_reshape = Rearrange('b (p1 p2) d -> b d p1 p2', p1=16, p2=16)
         self.channel_resize = nn.Conv2d(1280, 256, kernel_size=1, stride=1, padding=0)
         self.norm = nn.BatchNorm2d(256)
-        self.norm_concat = nn.BatchNorm2d(257)
+        self.norm_concat = nn.BatchNorm2d(288)
 
         for param in self.encoder.parameters():
             param.requires_grad = False

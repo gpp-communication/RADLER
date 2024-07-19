@@ -7,7 +7,7 @@ class RODDecoder(nn.Module):
     def __init__(self, n_class, fuse_semantic_depth_feature):
         super(RODDecoder, self).__init__()
         if fuse_semantic_depth_feature:
-            self.convt1 = nn.ConvTranspose2d(in_channels=257, out_channels=128,
+            self.convt1 = nn.ConvTranspose2d(in_channels=288, out_channels=128,
                                          kernel_size=(6, 6), stride=(2, 2), padding=(2, 2))
         else:
             self.convt1 = nn.ConvTranspose2d(in_channels=256, out_channels=128,
