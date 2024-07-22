@@ -12,9 +12,9 @@ class SemanticDepthFeatureExtractor(nn.Module):
         self.backbone = nn.Sequential(*(list(torchvision.models.resnet18().children())[:-1]))
         self.convt1 = nn.ConvTranspose2d(512, 256, kernel_size=(6, 6), stride=(2, 2), padding=(2, 2))
         self.convt2 = nn.ConvTranspose2d(256, 128, kernel_size=(6, 6), stride=(2, 2), padding=(2, 2))
-        self.convt3 = nn.ConvTranspose2d(128, 64, kernel_size=(6, 6), stride=(2, 2), padding=(2, 2))
-        self.convt4 = nn.ConvTranspose2d(64, 32, kernel_size=(6, 6), stride=(2, 2), padding=(2, 2))
-        self.norm = nn.BatchNorm2d(32)
+        self.convt3 = nn.ConvTranspose2d(128, 128, kernel_size=(6, 6), stride=(2, 2), padding=(2, 2))
+        self.convt4 = nn.ConvTranspose2d(128, 128, kernel_size=(6, 6), stride=(2, 2), padding=(2, 2))
+        self.norm = nn.BatchNorm2d(128)
 
     def forward(self, x):
         x = self.conv(x)
