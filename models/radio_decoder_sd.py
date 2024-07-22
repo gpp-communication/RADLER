@@ -14,7 +14,8 @@ class DecoderSD(nn.Module):
                                          kernel_size=(6, 6), stride=(2, 2), padding=(2, 2))
         self.convt4 = nn.ConvTranspose2d(in_channels=48, out_channels=24,
                                          kernel_size=(6, 6), stride=(2, 2), padding=(2, 2))
-        self.conv = nn.Conv2d(in_channels=24, out_channels=n_class, kernel_size=1)
+        self.conv1 = nn.Conv2d(in_channels=24, out_channels=12, kernel_size=1)
+        self.conv2 = nn.Conv2d(in_channels=12, out_channels=n_class, kernel_size=1)
         self.downsample = nn.Upsample(size=(224, 221), mode='bilinear')
         self.prelu = nn.PReLU()
         self.sigmoid = nn.Sigmoid()
