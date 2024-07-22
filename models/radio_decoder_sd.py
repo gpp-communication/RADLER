@@ -25,7 +25,8 @@ class DecoderSD(nn.Module):
         x = self.prelu(self.convt2(x))  # (B, x, 32, 32) -> (B, x, 64, 64)
         x = self.prelu(self.convt3(x))  # (B, x, 64, 64) -> (B, x, 128, 128)
         x = self.prelu(self.convt4(x))  # (B, x, 128, 128) -> (B, x, 256, 256)
-        x = self.conv(x)                # (B, x, 256, 256) -> (B, 3, 256, 256)
+        x = self.conv1(x)               # (B, x, 256, 256) -> (B, x, 256, 256)
+        x = self.conv2(x)               # (B, x, 256, 256) -> (B, 3, 256, 256)
         x = self.downsample(x)          # (B, 3, 256, 256) -> (B, 3, 224, 221)
         x = self.sigmoid(x)
         return x
