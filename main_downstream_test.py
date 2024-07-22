@@ -276,7 +276,10 @@ def test(test_loader, model, args):
             raw_radar_data = np.load(radar_path)
             gt_confmap = np.load(gt_confmap_path)
             test_img_path = os.path.join(folder, os.path.basename(image_path))
+            output_confmap_path = test_img_path.replace('png', 'npy')
             visualize_test_img(test_img_path, image_path, raw_radar_data, output_confmap[j], gt_confmap[:3, :, :], results)
+            np.save(output_confmap_path, output_confmap[j])
+
         proc_time = time.time() - proc_tic
         print("Testing: step:%d/%d | Load time: %.4f | Inference time: %.4f | Process time: %.4f" %
               (i, 2000 / args.batch_size, load_time, inference_time, proc_time))
