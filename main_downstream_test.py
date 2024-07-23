@@ -214,8 +214,6 @@ def main_worker(gpu, ngpus_per_node, args):
         print(
             "=> loaded checkpoint '{}'".format(args.pretrained)
         )
-        with open(os.path.join(args.results_dir, 'weight_source.txt'), 'w+') as f:
-            f.write(args.pretrained)
     else:
         print("=> no checkpoint found at '{}'".format(args.pretrained))
 
@@ -224,6 +222,8 @@ def main_worker(gpu, ngpus_per_node, args):
                                               'fuse_semantic_depth_tensor_' + str(args.fuse_semantic_depth_tensor)
                                               ]))
     os.makedirs(args.results_dir, exist_ok=True)
+    with open(os.path.join(args.results_dir, 'weight_source.txt'), 'w+') as f:
+        f.write(args.pretrained)
 
     cudnn.benchmark = True
 
