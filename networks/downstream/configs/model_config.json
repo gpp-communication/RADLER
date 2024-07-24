@@ -1,5 +1,5 @@
 {
   "max_dets": 20,
   "peak_thres": 0.3,
-  "ols_thres": 0.3
+  "ols_thres": 0.4
 }
