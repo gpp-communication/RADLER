@@ -25,7 +25,7 @@ def load_radar_data(paths):
 
 if __name__ == '__main__':
     radar_paths = []
-    radar_folder_dir = '/Users/yluo/Pictures/test'
+    radar_folder_dir = '/Users/yluo/Pictures/test1'
     for root, dirs, files in os.walk(radar_folder_dir):
         for file in files:
             radar_paths.append(os.path.join(root, file))

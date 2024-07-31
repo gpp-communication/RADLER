@@ -37,7 +37,7 @@ if __name__ == '__main__':
     res_with_sd = ''
     res_without_sd = ''
     res_rodnet = '/Users/yluo/Downloads/rodnet-cdc-win16-tum-20240716-230710'
-    ground_truth = '/Users/yluo/Pictures/CRTUM_new/data_cluster_1_2/downstream/test'
+    ground_truth = '/Users/yluo/Pictures/CRTUM_new/data_cluster_1_2/downstream/test1'
     sites = ['Arcisstrasse1', 'Arcisstrasse2', 'Arcisstrasse3', 'Arcisstrasse4',
              'Arcisstrasse5', 'Gabelsbergerstrasse1', 'Gabelsbergerstrasse2']
     evaluation_res = {'with_sd': {}, 'without_sd': {}, 'rodnet': {}}

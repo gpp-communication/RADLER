@@ -164,12 +164,12 @@ if __name__ == '__main__':
     angle_grids = confmap2ra('angle', radar_configs)
     # print(range_grids)
     # print(angle_grids)
-    splits = ['test', 'train']
+    splits = ['test1', 'train']
     sites = ['Arcisstrasse1', 'Arcisstrasse2', 'Arcisstrasse3', 'Arcisstrasse4',
              'Arcisstrasse5', 'Gabelsbergerstrasse1', 'Gabelsbergerstrasse2']
     num_frames = {'train': {'Arcisstrasse1': 1137, 'Arcisstrasse2': 667, 'Arcisstrasse3': 1344, 'Arcisstrasse4': 1314,
                             'Arcisstrasse5': 1414, 'Gabelsbergerstrasse1': 1076, 'Gabelsbergerstrasse2': 907},
-                  'test': {'Arcisstrasse1': 285, 'Arcisstrasse2': 167, 'Arcisstrasse3': 337, 'Arcisstrasse4': 329,
+                  'test1': {'Arcisstrasse1': 285, 'Arcisstrasse2': 167, 'Arcisstrasse3': 337, 'Arcisstrasse4': 329,
                            'Arcisstrasse5': 354, 'Gabelsbergerstrasse1': 270, 'Gabelsbergerstrasse2': 227}
                   }
     for split in splits:

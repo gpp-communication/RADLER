@@ -42,7 +42,7 @@ def idx2polar_res(res_file):
 
 
 if __name__ == '__main__':
-    splits = ['train', 'test']
+    splits = ['train', 'test1']
     sites = ['Arcisstrasse1', 'Arcisstrasse2', 'Arcisstrasse3', 'Arcisstrasse4',
              'Arcisstrasse5', 'Gabelsbergerstrasse1', 'Gabelsbergerstrasse2']
     # for split in splits:

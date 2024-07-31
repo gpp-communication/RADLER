@@ -87,7 +87,7 @@ def visualize_test_img(fig_name, img_path, radar_data, output_confmap, gt_confma
 
 
 if __name__ == '__main__':
-    fig_name = 'test'
+    fig_name = 'test1'
     img_path = '/Users/yluo/Project/Radio-Vision-CityGML/datasets/test/test/IMAGES_0/000000.png'
     radar_path = '/Users/yluo/Project/Radio-Vision-CityGML/datasets/test/test/RADAR_RA_H/000000.npy'
     gt_confmap_path = '/Users/yluo/Project/Radio-Vision-CityGML/datasets/test/test/GT_CONFMAPS/000000.npy'

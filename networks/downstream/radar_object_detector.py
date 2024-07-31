@@ -35,7 +35,7 @@ class RadarObjectDetector(nn.Module):
         self.fuse_semantic_depth_feature = fuse_semantic_depth_feature
         if mode == 'train':
             self.encoder = pretrained_encoder(pretrained_model)
-        elif mode == 'test':
+        elif mode == 'test1':
             self.encoder = SSLEncoder()
         self.decoder = Decoder(num_class)
         if self.fuse_semantic_depth_feature:

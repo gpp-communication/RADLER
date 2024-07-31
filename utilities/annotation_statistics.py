@@ -1,7 +1,7 @@
 sites = ['Arcisstrasse1', 'Arcisstrasse2', 'Arcisstrasse3', 'Arcisstrasse4',
          'Arcisstrasse5', 'Gabelsbergerstrasse1', 'Gabelsbergerstrasse2']
 
-splits = ['train', 'test']
+splits = ['train', 'test1']
 
 objects = {'car': 0, 'cyclist': 0, 'pedestrian': 0}
 
