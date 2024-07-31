@@ -222,6 +222,8 @@ def main_worker(gpu, ngpus_per_node, args):
                                               'fuse_semantic_depth_tensor_' + str(args.fuse_semantic_depth_tensor)
                                               ]))
     os.makedirs(args.results_dir, exist_ok=True)
+    with open(os.path.join(args.results_dir, 'weight_source.txt'), 'w+') as f:
+        f.write(args.pretrained)
 
     cudnn.benchmark = True
 
@@ -276,7 +278,11 @@ def test(test_loader, model, args):
             raw_radar_data = np.load(radar_path)
             gt_confmap = np.load(gt_confmap_path)
             test_img_path = os.path.join(folder, os.path.basename(image_path))
+            output_confmap_path = test_img_path.replace('png', 'npy')
             visualize_test_img(test_img_path, image_path, raw_radar_data, output_confmap[j], gt_confmap[:3, :, :], results)
+            with open(output_confmap_path, 'wb') as f:
+                np.save(f, output_confmap[j])
+
         proc_time = time.time() - proc_tic
         print("Testing: step:%d/%d | Load time: %.4f | Inference time: %.4f | Process time: %.4f" %
               (i, 2000 / args.batch_size, load_time, inference_time, proc_time))
