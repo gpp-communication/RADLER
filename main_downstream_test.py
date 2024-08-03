@@ -97,10 +97,6 @@ parser.add_argument(
     type=str,
     help="folder path to save results"
 )
-parser.add_argument(
-    "--fuse-semantic-depth-tensor", default=False, action="store_true",
-    help="whether to fuse semantic depth tensor"
-)
 
 
 def main():
@@ -173,7 +169,7 @@ def main_worker(gpu, ngpus_per_node, args):
         )
     # create model
     print("=> creating model '{}'".format("Radar Object Detector"))
-    model = RadarObjectDetector(None, 'test', 3, args.fuse_semantic_depth_tensor)
+    model = RadarObjectDetector(None, 'test', 3)
 
     if args.distributed:
         # For multiprocessing distributed, DistributedDataParallel constructor
@@ -217,10 +213,7 @@ def main_worker(gpu, ngpus_per_node, args):
     else:
         print("=> no checkpoint found at '{}'".format(args.pretrained))
 
-    args.results_dir = os.path.join(args.results_dir,
-                                    '-'.join(['testing', str(args.batch_size * ngpus_per_node),
-                                              'fuse_semantic_depth_tensor_' + str(args.fuse_semantic_depth_tensor)
-                                              ]))
+    args.results_dir = os.path.join(args.results_dir, '-'.join(['testing', str(args.batch_size * ngpus_per_node)]))
     os.makedirs(args.results_dir, exist_ok=True)
     with open(os.path.join(args.results_dir, 'weight_source.txt'), 'w+') as f:
         f.write(args.pretrained)
