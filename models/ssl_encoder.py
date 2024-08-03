@@ -26,16 +26,7 @@ class SSLEncoder(nn.Module):
 
 
 def image_transform():
-    # return ViT_H_14_Weights.IMAGENET1K_SWAG_LINEAR_V1.transforms()
-    return transforms.Compose([
-        transforms.Resize(224),
-        transforms.CenterCrop(224),
-        transforms.ToTensor(),
-        transforms.RandomApply(torch.nn.ModuleList([
-            transforms.ColorJitter(0.2, 0.2, 0.2, 0.2)
-        ]), p=0.8),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-    ])
+    return ViT_H_14_Weights.IMAGENET1K_SWAG_LINEAR_V1.transforms()
 
 
 def radar_transform():
@@ -59,7 +50,7 @@ def CRUW_dataloader(root, batch_size, num_workers=4, image_transform=None,
 
 if __name__ == '__main__':
     vision_encoder = SSLEncoder()
-    data_loader = CRUW_dataloader('./datasets/CRUW', batch_size=1, image_transform=image_transform(),
+    data_loader = CRUW_dataloader('../datasets/CRUW', batch_size=1, image_transform=image_transform(),
                                   radar_frames_transform=radar_transform())
     with torch.no_grad():
         for i, (images, radar_frames) in enumerate(data_loader):
