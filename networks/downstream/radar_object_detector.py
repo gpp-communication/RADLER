@@ -7,7 +7,6 @@ from einops.layers.torch import Rearrange
 
 from models.radio_decoder import Decoder
 from models.ssl_encoder import SSLEncoder
-from models.semantic_depth_feature_extractor import SemanticDepthFeatureExtractor
 
 parser = argparse.ArgumentParser(description='Radar Object Detection')
 parser.add_argument('--pretrained-model', type=str, default='')
