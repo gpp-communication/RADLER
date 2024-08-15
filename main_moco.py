@@ -17,7 +17,7 @@ import subprocess
 
 import networks.ssl.moco.builder as builder
 from models.ssl_encoder import SSLEncoder, image_transform, radar_transform
-from data_tools.ssl.CRTUM_dataset import CRTUMDataset
+from data_tools.ssl.CRUW_dataset import CRUWDataset
 import torch
 import torch.backends.cudnn as cudnn
 import torch.distributed as dist
@@ -317,7 +317,7 @@ def main_worker(gpu, ngpus_per_node, args):
 
     # Data loading code
     traindir = os.path.join(args.data)
-    train_dataset = CRTUMDataset(traindir, img_transform=image_transform(), radar_transform=radar_transform())
+    train_dataset = CRUWDataset(traindir, img_transform=image_transform(), radar_transform=radar_transform())
 
     if args.distributed:
         train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
