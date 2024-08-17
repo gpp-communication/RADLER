@@ -13,9 +13,12 @@ class DownstreamDataset(CRUWDataset):
         img_path = self.df['images'][idx]
         radar_path = self.df['radar_frames'][idx]
         radar_frame = np.load(radar_path)
+        radar_frame = np.sqrt(radar_frame[:, :, 0] ** 2 + radar_frame[:, :, 1] ** 2)
         radar_frame = np.expand_dims(radar_frame, 2)
         radar_frame = np.repeat(radar_frame, 3, 2)
+        print(radar_frame.shape)
         radar_frame = np.pad(radar_frame, ((48, 48), (48, 48), (0, 0)), 'constant')
+        print(radar_frame.shape)
         
         if self.radar_transform is not None:
             radar_frame = self.radar_transform(radar_frame)
@@ -25,7 +28,7 @@ class DownstreamDataset(CRUWDataset):
 
 
 if __name__ == '__main__':
-    dataset = DownstreamDataset('../../datasets/test', transforms.ToTensor())
+    dataset = DownstreamDataset('../../datasets/CRUW', transforms.ToTensor())
     dataloader = DataLoader(dataset, batch_size=1, shuffle=True, num_workers=4)
     for img_path, radar, semantic_depth, gt_conf in dataloader:
         print(img_path, radar.shape, semantic_depth.shape, gt_conf.shape)
