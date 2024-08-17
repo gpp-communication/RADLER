@@ -90,7 +90,7 @@ def read_train_log(train_log_path, mode='all'):
 
 if __name__ == '__main__':
     args = parser.parse_args()
-    mode = 'loss'  # to plot either all loss, acc1, and acc5 or only loss (mode = 'loss')
+    mode = 'all'  # to plot either all loss, acc1, and acc5 or only loss (mode = 'loss')
     if mode == 'all':
         epoch_arr, loss_arr, acc1_arr, acc5_arr = read_train_log(args.log, mode)
         fig, ax1 = plt.subplots()

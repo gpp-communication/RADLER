@@ -1,12 +1,12 @@
 import os
 import torch
 import numpy as np
-from data_tools.ssl import CRTUMDataset
+from data_tools.ssl import CRUWDataset
 from torch.utils.data import DataLoader
 from torchvision.transforms import transforms
 
 
-class DownstreamDataset(CRTUMDataset):
+class DownstreamDataset(CRUWDataset):
     def __init__(self, root_dir: str, radar_transform=None, semantic_depth_transform=None,
                  semantic_depth_file_name='semantic_depth_35.npy'):
         super().__init__(root_dir, None, radar_transform)
@@ -27,7 +27,7 @@ class DownstreamDataset(CRTUMDataset):
         radar_frame = np.load(radar_path)
         radar_frame = np.expand_dims(radar_frame, 2)
         radar_frame = np.repeat(radar_frame, 3, 2)
-        radar_frame = np.pad(radar_frame, ((0, 0), (2, 1), (0, 0)), 'constant')
+        radar_frame = np.pad(radar_frame, ((48, 48), (48, 48), (0, 0)), 'constant')
         semantic_depth_tensor = np.load(os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(radar_path)),
                                                                      self.semantic_depth_file_name)))
         if self.radar_transform is not None:
