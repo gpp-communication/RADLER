@@ -162,25 +162,19 @@ if __name__ == '__main__':
         radar_configs = json.load(radar_json)
     range_grids = confmap2ra('range', radar_configs)
     angle_grids = confmap2ra('angle', radar_configs)
-    # print(range_grids)
-    # print(angle_grids)
     splits = ['test', 'train']
-    sites = ['Arcisstrasse1', 'Arcisstrasse2', 'Arcisstrasse3', 'Arcisstrasse4',
-             'Arcisstrasse5', 'Gabelsbergerstrasse1', 'Gabelsbergerstrasse2']
-    num_frames = {'train': {'Arcisstrasse1': 1137, 'Arcisstrasse2': 667, 'Arcisstrasse3': 1344, 'Arcisstrasse4': 1314,
-                            'Arcisstrasse5': 1414, 'Gabelsbergerstrasse1': 1076, 'Gabelsbergerstrasse2': 907},
-                  'test': {'Arcisstrasse1': 285, 'Arcisstrasse2': 167, 'Arcisstrasse3': 337, 'Arcisstrasse4': 329,
-                           'Arcisstrasse5': 354, 'Gabelsbergerstrasse1': 270, 'Gabelsbergerstrasse2': 227}
-                  }
+    sites = [site for site in os.listdir("/Users/yluo/Pictures/CRUW/downstream/sequences/train/") if site != ".DS_Store"]
+    print(sites)
     for split in splits:
         for site in sites:
             print(split, site)
-            anno_path = ("/Users/yluo/Pictures/CRTUM_new/data_cluster_1_2/downstream/" + split + '/' + site +
-                         '/' + site + '.txt')
-            conf_folder = ("/Users/yluo/Pictures/CRTUM_new/data_cluster_1_2/downstream/" + split + '/' + site +
-                         '/GT_CONFMAPS')
+            anno_path = ("/Users/yluo/Pictures/CRUW/downstream/annotations/" + split + '/' + site + '.txt')
+            conf_folder = ("/Users/yluo/Pictures/CRUW/downstream/sequences/" + split + '/' + site +
+                           '/GT_CONFMAPS')
             os.makedirs(conf_folder, exist_ok=True)
-            meta_dict = load_anno_txt(anno_path, num_frames[split][site], range_grids, angle_grids)
+            with open(anno_path, 'r') as f:
+                num_frame = int(f.readlines()[-1].split(' ')[0]) + 1
+            meta_dict = load_anno_txt(anno_path, num_frame, range_grids, angle_grids)
             # print(meta_dict)
             print("Load annotations done")
             confmaps = generate_confmaps(meta_dict, radar_configs, 3)
