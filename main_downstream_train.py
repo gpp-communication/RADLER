@@ -223,7 +223,7 @@ def main_worker(gpu, ngpus_per_node, args):
         )
     # create model
     print("=> creating model '{}'".format("Radar Object Detector"))
-    model = RadarObjectDetector(args.pretrained, 'train', 3, args.fuse_semantic_depth_tensor)
+    model = RadarObjectDetector(args.pretrained, 'train', 3)
 
     if args.distributed:
         # For multiprocessing distributed, DistributedDataParallel constructor
@@ -291,8 +291,7 @@ def main_worker(gpu, ngpus_per_node, args):
     # Data loading code
     train_dataset_dir = args.data
     radar_transforms = radar_transform()
-    semantic_depth_transforms = transforms.Compose([transforms.ToTensor()])
-    train_dataset = DownstreamDataset(train_dataset_dir, radar_transforms, semantic_depth_transforms)
+    train_dataset = DownstreamDataset(train_dataset_dir, radar_transforms)
 
     if args.distributed:
         train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
