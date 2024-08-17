@@ -345,7 +345,7 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
     )
 
     end = time.time()
-    for i, (image_paths, radar_data, semantic_depth_tensors, gt_confmaps) in enumerate(train_loader):
+    for i, (image_paths, radar_data, gt_confmaps) in enumerate(train_loader):
         # measure data loading time
         data_time.update(time.time() - end)
 
@@ -354,7 +354,7 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
         gt_confmaps = gt_confmaps.cuda(args.gpu, non_blocking=True)
 
         # compute output
-        output_confmap = model(radar_data, semantic_depth_tensors)
+        output_confmap = model(radar_data)
         loss = criterion(output_confmap, gt_confmaps)
 
         # visualize training process
