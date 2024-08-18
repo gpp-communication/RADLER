@@ -15,6 +15,7 @@ def visualize_training(fig_name, img_path, radar_data, output_confmap, gt_confma
     plt.imshow(img_data)
 
     fig.add_subplot(2, 2, 2)
+    radar_data = np.sqrt(radar_data[:, :, 0] ** 2 + radar_data[:, :, 1] ** 2)
     radar_data[radar_data == 0] = 1
     data = np.log10(radar_data) * 20
     max_value = np.max(data)
@@ -49,6 +50,7 @@ def visualize_test_img(fig_name, img_path, radar_data, output_confmap, gt_confma
     plt.title("Image")
 
     fig.add_subplot(2, 2, 2)
+    radar_data = np.sqrt(radar_data[:, :, 0] ** 2 + radar_data[:, :, 1] ** 2)
     radar_data[radar_data == 0] = 1
     data = np.log10(radar_data) * 20
     max_value = np.max(data)
