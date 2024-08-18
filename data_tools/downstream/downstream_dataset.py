@@ -20,6 +20,7 @@ class DownstreamDataset(CRUWDataset):
     def __getitem__(self, idx):
         img_path = self.df['images'][idx]
         radar_path = self.df['radar_frames'][idx]
+        print(radar_path)
         gt_confmap_path = self.df['gt_confmaps'][idx]
         radar_frame = np.load(radar_path)
         radar_frame = np.sqrt(radar_frame[:, :, 0] ** 2 + radar_frame[:, :, 1] ** 2)
@@ -37,7 +38,7 @@ class DownstreamDataset(CRUWDataset):
 
 
 if __name__ == '__main__':
-    dataset = DownstreamDataset('../../datasets/CRUW', transforms.ToTensor())
+    dataset = DownstreamDataset('/Users/yluo/Pictures/CRUW/downstream/sequences/train', transforms.ToTensor())
     dataloader = DataLoader(dataset, batch_size=1, shuffle=True, num_workers=4)
     for img_path, radar, gt_conf in dataloader:
         print(img_path, radar.shape, gt_conf.shape)

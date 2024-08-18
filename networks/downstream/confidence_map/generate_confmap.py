@@ -163,7 +163,7 @@ if __name__ == '__main__':
     range_grids = confmap2ra('range', radar_configs)
     angle_grids = confmap2ra('angle', radar_configs)
     splits = ['test', 'train']
-    sites = [site for site in os.listdir("/Users/yluo/Pictures/CRUW/downstream/sequences/train/") if site != ".DS_Store"]
+    sites = ["2019_09_29_ONRD002"]
     print(sites)
     for split in splits:
         for site in sites:
@@ -172,8 +172,7 @@ if __name__ == '__main__':
             conf_folder = ("/Users/yluo/Pictures/CRUW/downstream/sequences/" + split + '/' + site +
                            '/GT_CONFMAPS')
             os.makedirs(conf_folder, exist_ok=True)
-            with open(anno_path, 'r') as f:
-                num_frame = int(f.readlines()[-1].split(' ')[0]) + 1
+            num_frame = len(os.listdir(conf_folder.replace('GT_CONFMAPS', 'IMAGES_0')))
             meta_dict = load_anno_txt(anno_path, num_frame, range_grids, angle_grids)
             # print(meta_dict)
             print("Load annotations done")
