@@ -223,8 +223,7 @@ def main_worker(gpu, ngpus_per_node, args):
     # Data loading code
     test_dataset_dir = args.data
     radar_transforms = radar_transform()
-    semantic_depth_transforms = transforms.Compose([transforms.ToTensor()])
-    test_dataset = DownstreamDataset(test_dataset_dir, radar_transforms, semantic_depth_transforms)
+    test_dataset = DownstreamDataset(test_dataset_dir, radar_transforms)
 
     if args.distributed:
         test_sampler = torch.utils.data.distributed.DistributedSampler(test_dataset)
@@ -246,7 +245,7 @@ def main_worker(gpu, ngpus_per_node, args):
 
 def test(test_loader, model, args):
     load_tic = time.time()
-    for i, (image_paths, radar_data, semantic_depth_tensors, gt_confmaps) in enumerate(test_loader):
+    for i, (image_paths, radar_data, gt_confmaps) in enumerate(test_loader):
         load_time = time.time() - load_tic
         if args.gpu is not None:
             radar_data = radar_data.cuda(args.gpu, non_blocking=True)
@@ -255,7 +254,7 @@ def test(test_loader, model, args):
         model.eval()
         inference_tic = time.time()
         with torch.no_grad():
-            output_confmap = model(radar_data, semantic_depth_tensors)
+            output_confmap = model(radar_data)
         inference_time = time.time() - inference_tic
         output_confmap = output_confmap.detach().cpu().numpy()
         proc_tic = time.time()
@@ -264,14 +263,14 @@ def test(test_loader, model, args):
             folder = os.path.join(os.path.join(args.results_dir, os.path.basename(os.path.dirname(os.path.dirname(image_paths[j])))))
             os.makedirs(folder, exist_ok=True)
             write_single_frame_detection_results(results, os.path.join(args.results_dir, os.path.basename(os.path.dirname(os.path.dirname(image_paths[j]))) + '.txt'),
-                                                 os.path.basename(image_paths[j]).rstrip('.png'))
+                                                 os.path.basename(image_paths[j]).rstrip('.jpg'))
             image_path = image_paths[j]
-            radar_path = image_path.replace('IMAGES_0', 'RADAR_RA_H').replace('png', 'npy')
-            gt_confmap_path = image_path.replace('IMAGES_0', 'GT_CONFMAPS').replace('png', 'npy')
+            radar_path = image_path.replace('IMAGES_0', 'RADAR_RA_H').replace('jpg', 'npy')
+            gt_confmap_path = image_path.replace('IMAGES_0', 'GT_CONFMAPS').replace('jpg', 'npy')
             raw_radar_data = np.load(radar_path)
             gt_confmap = np.load(gt_confmap_path)
             test_img_path = os.path.join(folder, os.path.basename(image_path))
-            output_confmap_path = test_img_path.replace('png', 'npy')
+            output_confmap_path = test_img_path.replace('jpg', 'npy')
             visualize_test_img(test_img_path, image_path, raw_radar_data, output_confmap[j], gt_confmap[:3, :, :], results)
             with open(output_confmap_path, 'wb') as f:
                 np.save(f, output_confmap[j])
