@@ -1,6 +1,7 @@
 import argparse
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.ticker import FormatStrFormatter
 
 parser = argparse.ArgumentParser(description='Loss plot')
 parser.add_argument('log', type=str)
@@ -90,7 +91,7 @@ def read_train_log(train_log_path, mode='all'):
 
 if __name__ == '__main__':
     args = parser.parse_args()
-    mode = 'loss'  # to plot either all loss, acc1, and acc5 or only loss (mode = 'loss')
+    mode = 'all'  # to plot either all loss, acc1, and acc5 or only loss (mode = 'loss')
     if mode == 'all':
         epoch_arr, loss_arr, acc1_arr, acc5_arr = read_train_log(args.log, mode)
         fig, ax1 = plt.subplots()
@@ -98,11 +99,16 @@ if __name__ == '__main__':
         ax1.plot(np.array(epoch_arr), np.array(loss_arr), label='loss', color='r')
         ax2.plot(np.array(epoch_arr), np.array(acc1_arr), label='acc1', color='g', linestyle='--')
         ax2.plot(np.array(epoch_arr), np.array(acc5_arr), label='acc5', color='y', linestyle='--')
-        fig.legend(loc='upper right')
+        fig.legend(loc='upper left')
+        ax1.set_xlabel('Epoch')
+        ax1.set_ylabel('Loss')
+        ax2.set_ylabel('Accuracy (%)')
         plt.show()
     elif mode == 'loss':
         epoch_arr, loss_arr = read_train_log(args.log, mode)
         fig, ax1 = plt.subplots()
         ax1.plot(np.array(epoch_arr), np.array(loss_arr), label='loss', color='r')
-        fig.legend(loc='upper right')
+        fig.legend(loc='upper left')
+        ax1.set_xlabel('Epoch')
+        ax1.set_ylabel('Loss')
         plt.show()
