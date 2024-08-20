@@ -94,7 +94,7 @@ def visualize_confmap(confmaps, save_path):
 
 
 def generate_confmaps(metadata_dict, radar_configs, n_class):
-    with open('../configs/confmap_object_config.json') as f:
+    with open('/home/stud/luoyu/storage/user/luoyu/projects/Radio-Vision-CityGML/networks/downstream/configs/confmap_object_config.json') as f:
         object_config = json.load(f)
     confmaps = []
     for metadata_frame in metadata_dict:
@@ -158,18 +158,22 @@ def save_confmaps(confmaps, confmaps_dir):
 
 
 if __name__ == '__main__':
-    with open('../configs/radar_config.json') as radar_json:
+    with open('/home/stud/luoyu/storage/user/luoyu/projects/Radio-Vision-CityGML/networks/downstream/configs/radar_config.json') as radar_json:
         radar_configs = json.load(radar_json)
     range_grids = confmap2ra('range', radar_configs)
     angle_grids = confmap2ra('angle', radar_configs)
     splits = ['test', 'train']
-    sites = ["2019_09_29_ONRD002"]
-    print(sites)
+    train_folders = ['2019_04_30_PBMS003', '2019_04_09_PMS1001', '2019_04_09_PMS1000', '2019_05_09_CM1S004', '2019_05_23_PM2S011', '2019_04_09_CMS1002', '2019_05_23_PM1S012', '2019_05_09_PCMS002', '2019_05_23_PM1S014', '2019_05_23_PM1S015', '2019_04_09_PMS2000', '2019_04_09_BMS1000', '2019_05_29_BM1S017', '2019_05_09_PBMS004', '2019_09_29_ONRD013', '2019_09_29_ONRD006', '2019_05_29_PM2S015', '2019_05_29_PM3S000', '2019_04_30_MLMS002', '2019_04_30_MLMS000', '2019_05_09_BM1S008', '2019_05_09_MLMS003', '2019_04_30_PCMS001', '2019_04_09_PMS3000', '2019_05_29_PCMS005', '2019_04_09_BMS1002', '2019_09_29_ONRD011', '2019_09_29_ONRD002', '2019_04_30_PBMS002', '2019_05_29_MLMS006', '2019_05_29_PBMS007', '2019_05_29_BM1S016', '2019_09_29_ONRD001', '2019_05_29_BCMS000', '2019_04_30_PM2S003', '2019_04_30_PM2S004']
+    test_folders = ['2019_04_09_BMS1001', '2019_04_30_MLMS001', '2019_05_23_PM1S013', '2019_09_29_ONRD005']
     for split in splits:
+        if split == 'train':
+            sites = train_folders
+        elif split == 'test':
+            sites = test_folders
         for site in sites:
             print(split, site)
-            anno_path = ("/Users/yluo/Pictures/CRUW/downstream/annotations/" + split + '/' + site + '.txt')
-            conf_folder = ("/Users/yluo/Pictures/CRUW/downstream/sequences/" + split + '/' + site +
+            anno_path = ("/home/stud/luoyu/storage/user/luoyu/projects/Radio-Vision-CityGML/datasets/CRUW/downstream/annotations/" + split + '/' + site + '.txt')
+            conf_folder = ("/home/stud/luoyu/storage/user/luoyu/projects/Radio-Vision-CityGML/datasets/CRUW/downstream/sequences/" + split + '/' + site +
                            '/GT_CONFMAPS')
             os.makedirs(conf_folder, exist_ok=True)
             num_frame = len(os.listdir(conf_folder.replace('GT_CONFMAPS', 'IMAGES_0')))
