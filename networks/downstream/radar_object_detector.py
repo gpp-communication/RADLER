@@ -42,7 +42,7 @@ class RadarObjectDetector(nn.Module):
         for param in self.encoder.parameters():
             param.requires_grad = False
 
-    def forward(self, x, semantic_depth_tensor=None):
+    def forward(self, x):
         x = self.encoder(x)
         x = self.feature_reshape(x)
         x = self.channel_resize(x)
