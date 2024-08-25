@@ -20,7 +20,6 @@ class DownstreamDataset(CRUWDataset):
     def __getitem__(self, idx):
         img_path = self.df['images'][idx]
         radar_path = self.df['radar_frames'][idx]
-        print(radar_path)
         gt_confmap_path = self.df['gt_confmaps'][idx]
         radar_frame = np.load(radar_path)
         radar_frame = np.sqrt(radar_frame[:, :, 0] ** 2 + radar_frame[:, :, 1] ** 2)
