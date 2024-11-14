@@ -13,7 +13,7 @@ parser.add_argument('--pretrained-model', type=str, default='')
 
 
 def pretrained_encoder(pretrained_model):
-    encoder_q = SSLEncoder()
+    encoder_q = SSLEncoder(input_data='radar')
     pretrained_weights = torch.load(pretrained_model, map_location=torch.device('cpu'))
     state_dict = pretrained_weights['state_dict']
     encoder_q_state_dict_old = {k: v for k, v in state_dict.items() if k.startswith('module.encoder_q.')}
@@ -33,11 +33,7 @@ class RadarObjectDetector(nn.Module):
         if mode == 'train':
             self.encoder = pretrained_encoder(pretrained_model)
         elif mode == 'test':
-            self.encoder = SSLEncoder()
-        self.upsample = nn.ConvTranspose2d(
-            in_channels=num_class, out_channels=num_class,
-            kernel_size=3, stride=2, padding=1, output_padding=1
-        )
+            self.encoder = SSLEncoder(input_data='radar')
         self.decoder = Decoder(num_class)
         self.feature_reshape = Rearrange('b (p1 p2) d -> b d p1 p2', p1=16, p2=16)
         self.channel_resize = nn.Conv2d(1280, 256, kernel_size=1, stride=1, padding=0)
@@ -47,8 +43,6 @@ class RadarObjectDetector(nn.Module):
             param.requires_grad = False
 
     def forward(self, x):
-        x = self.upsample(x)
-        x = F.interpolate(x, size=(224, 224), mode='bilinear', align_corners=False)
         x = self.encoder(x)
         x = self.feature_reshape(x)
         x = self.channel_resize(x)

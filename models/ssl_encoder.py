@@ -26,11 +26,15 @@ class SSLEncoder(nn.Module):
 
     def forward(self, data):
         if self.input_data == 'radar':
-            data = self.upsample(data)
-            data = F.interpolate(data, size=(224, 224), mode='bilinear', align_corners=False)
-        x = self.feature_extractor(data)
-        x = x['features']
-        x = x[:, 1:]
+            x = self.upsample(data)
+            x = F.interpolate(x, size=(224, 224), mode='bilinear', align_corners=False)
+            x = self.feature_extractor(x)
+            x = x['features']
+            x = x[:, 1:]
+        elif self.input_data == 'image':
+            x = self.feature_extractor(data)
+            x = x['features']
+            x = x[:, 1:]
         return x
 
 
@@ -58,12 +62,12 @@ def CRUW_dataloader(root, batch_size, num_workers=4, image_transform=None,
 
 
 if __name__ == '__main__':
-    vision_encoder = SSLEncoder()
+    vision_encoder = SSLEncoder(input_data='image')
+    radar_encoder = SSLEncoder(input_data='radar')
     data_loader = CRUW_dataloader('../datasets/CRUW', batch_size=1, image_transform=image_transform(),
                                   radar_frames_transform=radar_transform())
     with torch.no_grad():
         for i, (images, radar_frames) in enumerate(data_loader):
             img_output = vision_encoder(images)
-            print(radar_frames.shape)
-            radar_output = vision_encoder(radar_frames.to(dtype=torch.float32))
+            radar_output = radar_encoder(radar_frames.to(dtype=torch.float32))
             print(img_output.shape, radar_output.shape)
