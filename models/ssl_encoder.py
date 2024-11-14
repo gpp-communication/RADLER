@@ -1,6 +1,7 @@
 import torch
 import torchvision
 import torch.nn as nn
+import torch.nn.functional as F
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 from torchvision.models import ViT_H_14_Weights
@@ -10,16 +11,24 @@ from data_tools.ssl.CRUW_dataset import CRUWDataset
 
 
 class SSLEncoder(nn.Module):
-    def __init__(self, image_size=224):
+    def __init__(self, input_data='radar'):
         super(SSLEncoder, self).__init__()
         self.patch_size = 14
+        self.input_data = input_data
+        self.upsample = nn.ConvTranspose2d(
+            in_channels=3, out_channels=3,
+            kernel_size=3, stride=2, padding=1, output_padding=1
+        )
         self.feature_extractor = create_feature_extractor(
             torchvision.models.vit_h_14(weights=ViT_H_14_Weights.IMAGENET1K_SWAG_LINEAR_V1),
             return_nodes={"encoder.ln": "features"}
         )
 
-    def forward(self, image):
-        x = self.feature_extractor(image)
+    def forward(self, data):
+        if self.input_data == 'radar':
+            data = self.upsample(data)
+            data = F.interpolate(data, size=(224, 224), mode='bilinear', align_corners=False)
+        x = self.feature_extractor(data)
         x = x['features']
         x = x[:, 1:]
         return x
@@ -55,5 +64,6 @@ if __name__ == '__main__':
     with torch.no_grad():
         for i, (images, radar_frames) in enumerate(data_loader):
             img_output = vision_encoder(images)
-            # radar_output = vision_encoder(radar_frames.to(dtype=torch.float32))
-            print(img_output.shape)
+            print(radar_frames.shape)
+            radar_output = vision_encoder(radar_frames.to(dtype=torch.float32))
+            print(img_output.shape, radar_output.shape)
