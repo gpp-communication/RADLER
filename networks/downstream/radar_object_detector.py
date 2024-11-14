@@ -1,7 +1,7 @@
 import torch
 import argparse
-import numpy as np
 import torch.nn as nn
+import torch.nn.functional as F
 from torch.nn.modules.module import T
 from einops.layers.torch import Rearrange
 
@@ -34,6 +34,10 @@ class RadarObjectDetector(nn.Module):
             self.encoder = pretrained_encoder(pretrained_model)
         elif mode == 'test':
             self.encoder = SSLEncoder()
+        self.upsample = nn.ConvTranspose2d(
+            in_channels=num_class, out_channels=num_class,
+            kernel_size=3, stride=2, padding=1, output_padding=1
+        )
         self.decoder = Decoder(num_class)
         self.feature_reshape = Rearrange('b (p1 p2) d -> b d p1 p2', p1=16, p2=16)
         self.channel_resize = nn.Conv2d(1280, 256, kernel_size=1, stride=1, padding=0)
@@ -43,6 +47,8 @@ class RadarObjectDetector(nn.Module):
             param.requires_grad = False
 
     def forward(self, x):
+        x = self.upsample(x)
+        x = F.interpolate(x, size=(224, 224), mode='bilinear', align_corners=False)
         x = self.encoder(x)
         x = self.feature_reshape(x)
         x = self.channel_resize(x)
@@ -59,18 +65,12 @@ if __name__ == '__main__':
     args = parser.parse_args()
     use_noise_channel = False
     n_classes = 3
-    if not use_noise_channel:
-        model = RadarObjectDetector(args.pretrained_model, num_class=n_classes)
-    else:
-        model = RadarObjectDetector(args.pretrained_model, num_class=n_classes+1)
-    test = torch.randn(1, 3, 224, 224)
-    semantic_depth_tensor_test = np.load('../../models/semantic_depth.npy')
-    semantic_depth_tensor_test = np.expand_dims(semantic_depth_tensor_test, 0)
-    semantic_depth_tensor_test = torch.from_numpy(semantic_depth_tensor_test).to(torch.float32)
+    model = RadarObjectDetector(pretrained_model="", mode='test')
+    test_data = torch.randn(1, 3, 128, 128)
     model.eval()
     criterion = nn.BCELoss()
     with torch.no_grad():
-        output = model(test, semantic_depth_tensor_test)
-        loss = criterion(output, torch.rand(1, 3, 224, 221))
+        output = model(test_data)
+        loss = criterion(output, torch.rand(1, 3, 128, 128))
         print(loss)
         print(output.shape)
