@@ -31,11 +31,12 @@ class SSLEncoder(nn.Module):
             x = self.feature_extractor(x)
             x = x['features']
             x = x[:, 1:]
+            return x
         elif self.input_data == 'image':
             x = self.feature_extractor(data)
             x = x['features']
             x = x[:, 1:]
-        return x
+            return x
 
 
 def image_transform():
