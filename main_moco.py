@@ -329,7 +329,7 @@ def main_worker(gpu, ngpus_per_node, args):
 
     # Data loading code
     traindir = os.path.join(args.data)
-    train_dataset = CRUW(traindir, img_transform=image_transform(), radar_transform=radar_transform())
+    train_dataset = CRUWDataset(traindir, img_transform=image_transform(), radar_transform=radar_transform())
 
     if args.distributed:
         train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
@@ -415,7 +415,6 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
         # compute output
         output, target = model(im_q=radar_frames, im_k=images)
         loss = criterion(output, target)
-        print(loss)
 
         # acc1/acc5 are (K+1)-way contrast classifier accuracy
         # measure accuracy and record loss
