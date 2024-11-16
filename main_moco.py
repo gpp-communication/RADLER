@@ -198,12 +198,32 @@ def main():
         # needs to be adjusted accordingly
         args.world_size = ngpus_per_node * args.world_size
         # Use torch.multiprocessing.spawn to launch distributed processes: the
-        # main_worker process function
-        mp.spawn(main_worker, nprocs=ngpus_per_node, args=(ngpus_per_node, args))
+        # main_worker process functiond
+        node_list = os.environ["SLURM_NODELIST"]
+        master_addr = subprocess.getoutput(f"scontrol show hostname {node_list} | head -n1")
+        if os.environ['SLURM_TOPOLOGY_ADDR'] == master_addr:
+            master_port = find_free_port()
+            args.master_addr = master_addr
+            args.master_port = master_port
+            print("spawn worker", master_addr, master_port)
+            mp.spawn(main_worker, nprocs=ngpus_per_node, args=(ngpus_per_node, args))
     else:
         # Simply call main_worker function
         main_worker(args.gpu, ngpus_per_node, args)
 
+def worker(rank, ngpu_per_node, args):
+    # Set the device for the current process
+    device = torch.device(f"cuda:{rank}" if torch.cuda.is_available() else "cpu")
+    # Initialize the process group
+    node_rank = int(os.environ["SLURM_PROCID"])
+    rank = node_rank * ngpu_per_node + rank
+    os.environ['MASTER_ADDR'] = args.master_addr
+    os.environ['MASTER_PORT'] = args.master_port
+    print(os.environ['MASTER_ADDR'], os.environ['MASTER_PORT'])
+    dist.init_process_group('nccl', init_method='env://', rank=rank, world_size=ngpu_per_node)
+    print(f"{rank=} init complete")
+    dist.destroy_process_group()
+    print(f"{rank=} destroy complete\n")
 
 def main_worker(gpu, ngpus_per_node, args):
     args.gpu = gpu
@@ -218,24 +238,18 @@ def main_worker(gpu, ngpus_per_node, args):
 
     if args.gpu is not None:
         print("Use GPU: {} for training".format(args.gpu))
-
     if args.distributed:
         if args.dist_url == "env://" and args.rank == -1:
             args.rank = int(os.environ["SLURM_PROCID"])
-        if "MASTER_ADDR" not in os.environ:
-            node_list = os.environ["SLURM_NODELIST"]
-            os.environ["MASTER_ADDR"] = subprocess.getoutput(f"scontrol show hostname {node_list} | head -n1")
-            if "MASTER_PORT" in os.environ:
-                pass  # use MASTER_PORT in the environment variable
-            else:
-                os.environ["MASTER_PORT"] = "29500"
         if args.multiprocessing_distributed:
             # For multiprocessing distributed training, rank needs to be the
             # global rank among all the processes
             args.rank = args.rank * ngpus_per_node + gpu
+        os.environ['MASTER_ADDR'] = args.master_addr
+        os.environ['MASTER_PORT'] = args.master_port
         dist.init_process_group(
             backend=args.dist_backend,
-            init_method=args.dist_url,
+            init_method=f'tcp://{args.master_addr}:{args.master_port}',
             world_size=args.world_size,
             rank=args.rank,
         )
@@ -249,8 +263,6 @@ def main_worker(gpu, ngpus_per_node, args):
         args.moco_m,
         args.moco_t,
     )
-    # print(model)
-    # print(model.get_submodule('encoder_q'))
 
     if args.distributed:
         # For multiprocessing distributed, DistributedDataParallel constructor
@@ -317,7 +329,7 @@ def main_worker(gpu, ngpus_per_node, args):
 
     # Data loading code
     traindir = os.path.join(args.data)
-    train_dataset = CRUWDataset(traindir, img_transform=image_transform(), radar_transform=radar_transform())
+    train_dataset = CRUW(traindir, img_transform=image_transform(), radar_transform=radar_transform())
 
     if args.distributed:
         train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
@@ -403,6 +415,7 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
         # compute output
         output, target = model(im_q=radar_frames, im_k=images)
         loss = criterion(output, target)
+        print(loss)
 
         # acc1/acc5 are (K+1)-way contrast classifier accuracy
         # measure accuracy and record loss
@@ -500,6 +513,15 @@ def accuracy(output, target, topk=(1,)):
             res.append(correct_k.mul_(100.0 / batch_size))
         return res
 
+def find_free_port():
+    """ https://stackoverflow.com/questions/1365265/on-localhost-how-do-i-pick-a-free-port-number """
+    import socket
+    from contextlib import closing
+
+    with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
+        s.bind(('', 0))
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        return str(s.getsockname()[1])
 
 if __name__ == "__main__":
     main()
