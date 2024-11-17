@@ -205,25 +205,10 @@ def main():
             master_port = find_free_port()
             args.master_addr = master_addr
             args.master_port = master_port
-            print("spawn worker", master_addr, master_port)
             mp.spawn(main_worker, nprocs=ngpus_per_node, args=(ngpus_per_node, args))
     else:
         # Simply call main_worker function
         main_worker(args.gpu, ngpus_per_node, args)
-
-def worker(rank, ngpu_per_node, args):
-    # Set the device for the current process
-    device = torch.device(f"cuda:{rank}" if torch.cuda.is_available() else "cpu")
-    # Initialize the process group
-    node_rank = int(os.environ["SLURM_PROCID"])
-    rank = node_rank * ngpu_per_node + rank
-    os.environ['MASTER_ADDR'] = args.master_addr
-    os.environ['MASTER_PORT'] = args.master_port
-    print(os.environ['MASTER_ADDR'], os.environ['MASTER_PORT'])
-    dist.init_process_group('nccl', init_method='env://', rank=rank, world_size=ngpu_per_node)
-    print(f"{rank=} init complete")
-    dist.destroy_process_group()
-    print(f"{rank=} destroy complete\n")
 
 def main_worker(gpu, ngpus_per_node, args):
     args.gpu = gpu
