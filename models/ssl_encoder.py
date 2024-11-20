@@ -8,6 +8,7 @@ from torchvision.models import ViT_H_14_Weights
 from torchvision.models.feature_extraction import create_feature_extractor
 
 from data_tools.ssl.CRUW_dataset import CRUWDataset
+from models.u_net import UNet
 
 
 class SSLEncoder(nn.Module):
@@ -15,10 +16,8 @@ class SSLEncoder(nn.Module):
         super(SSLEncoder, self).__init__()
         self.patch_size = 14
         self.input_data = input_data
-        self.upsample = nn.ConvTranspose2d(
-            in_channels=3, out_channels=3,
-            kernel_size=3, stride=2, padding=1, output_padding=1
-        )
+        self.upsample = UNet(in_channels=3, out_channels=3, kernel_size=3,
+             padding=1, stride=1)
         self.feature_extractor = create_feature_extractor(
             torchvision.models.vit_h_14(weights=ViT_H_14_Weights.IMAGENET1K_SWAG_LINEAR_V1),
             return_nodes={"encoder.ln": "features"}
@@ -65,7 +64,7 @@ def CRUW_dataloader(root, batch_size, num_workers=4, image_transform=None,
 if __name__ == '__main__':
     vision_encoder = SSLEncoder(input_data='image')
     radar_encoder = SSLEncoder(input_data='radar')
-    data_loader = CRUW_dataloader('../datasets/CRUW', batch_size=1, image_transform=image_transform(),
+    data_loader = CRUW_dataloader('../datasets/CRUW-test', batch_size=1, image_transform=image_transform(),
                                   radar_frames_transform=radar_transform())
     with torch.no_grad():
         for i, (images, radar_frames) in enumerate(data_loader):
