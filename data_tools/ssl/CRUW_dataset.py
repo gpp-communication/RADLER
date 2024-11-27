@@ -16,11 +16,12 @@ class CRUWDataset(CRTUMDataset):
         radar_frame = np.sqrt(radar_frame[:, :, 0] ** 2 + radar_frame[:, :, 1] ** 2)
         radar_frame = np.expand_dims(radar_frame, 2)
         radar_frame = np.repeat(radar_frame, 3, 2)
-        # radar_frame = np.transpose(radar_frame, (2, 0, 1))
         if self.image_transform is not None:
             image = self.image_transform(image)
         if self.radar_transform is not None:
             radar_frame = self.radar_transform(radar_frame)
+        image = image[:, None, :, :]
+        radar_frame = radar_frame[:, None, :, :]
         return image, radar_frame.to(dtype=torch.float32)
 
 
@@ -39,7 +40,7 @@ def CRUW_dataloader(root, batch_size, num_workers=4, image_transform=None,
 if __name__ == '__main__':
     # CRUW_dataset = CRUWDataset('../../datasets/CRUW')
     img_transform = transforms.Compose([
-        transforms.Resize([224, 224]),
+        transforms.Resize([128, 128]),
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])
@@ -47,7 +48,7 @@ if __name__ == '__main__':
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])
-    dataloader = CRUW_dataloader('../../datasets/CRUW', batch_size=32, num_workers=4, image_transform=img_transform,
+    dataloader = CRUW_dataloader('../../datasets/CRUW-test', batch_size=32, num_workers=4, image_transform=img_transform,
                                  radar_frames_transform=radar_transform)
     for i, (images, radar_frames) in enumerate(dataloader):
         print(images.shape, radar_frames.shape)

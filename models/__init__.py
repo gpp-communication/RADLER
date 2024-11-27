@@ -1,3 +1,3 @@
-from .radio_decoder import Decoder
-from .ssl_encoder import SSLEncoder
+from .radio_decoder import RODDecode
+from .ssl_encoder import SSLEncoder, RODEncodeCDC
 from .u_net import UNet

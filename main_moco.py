@@ -16,7 +16,7 @@ import warnings
 import subprocess
 
 import networks.ssl.moco.builder as builder
-from models.ssl_encoder import SSLEncoder, image_transform, radar_transform
+from models.ssl_encoder import RODEncodeCDC, image_transform, radar_transform
 from data_tools.ssl.CRUW_dataset import CRUWDataset
 import torch
 import torch.backends.cudnn as cudnn
@@ -240,9 +240,9 @@ def main_worker(gpu, ngpus_per_node, args):
         )
 
     # create model
-    print("=> creating model '{}'".format('ViT'))
+    print("=> creating model '{}'".format('RODNet CDC Encoder'))
     model = builder.MoCo(
-        SSLEncoder,
+        RODEncodeCDC,
         args.moco_dim,
         args.moco_k,
         args.moco_m,
