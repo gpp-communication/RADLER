@@ -23,7 +23,6 @@ import torch.nn.parallel
 import torch.optim
 import torch.utils.data
 import torch.utils.data.distributed
-import torchvision.transforms as transforms
 import numpy as np
 
 from networks.downstream import RadarObjectDetector
