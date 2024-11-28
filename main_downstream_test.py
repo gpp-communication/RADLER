@@ -259,7 +259,7 @@ def test(test_loader, model, args):
         output_confmap = output_confmap.detach().cpu().numpy()
         proc_tic = time.time()
         for j in range(output_confmap.shape[0]):
-            results = post_process_single_frame(output_confmap[j])
+            results = post_process_single_frame(output_confmap[j].squeeze())
             folder = os.path.join(os.path.join(args.results_dir, os.path.basename(os.path.dirname(os.path.dirname(image_paths[j])))))
             os.makedirs(folder, exist_ok=True)
             write_single_frame_detection_results(results, os.path.join(args.results_dir, os.path.basename(os.path.dirname(os.path.dirname(image_paths[j]))) + '.txt'),
@@ -271,7 +271,7 @@ def test(test_loader, model, args):
             gt_confmap = np.load(gt_confmap_path)
             test_img_path = os.path.join(folder, os.path.basename(image_path))
             output_confmap_path = test_img_path.replace('jpg', 'npy')
-            visualize_test_img(test_img_path, image_path, raw_radar_data, output_confmap[j], gt_confmap[:3, :, :], results)
+            visualize_test_img(test_img_path, image_path, raw_radar_data, output_confmap[j].squeeze(), gt_confmap[:3, :, :], results)
             with open(output_confmap_path, 'wb') as f:
                 np.save(f, output_confmap[j])
 

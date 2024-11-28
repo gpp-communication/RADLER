@@ -38,7 +38,7 @@ class DownstreamDataset(CRUWDataset):
 
 
 if __name__ == '__main__':
-    dataset = DownstreamDataset('../../datasets/test', transforms.ToTensor())
+    dataset = DownstreamDataset('../../datasets/CRUW-test', transforms.ToTensor())
     dataloader = DataLoader(dataset, batch_size=1, shuffle=True, num_workers=4)
     for img_path, radar, gt_conf in dataloader:
         print(img_path, radar.shape, gt_conf.shape)
