@@ -160,7 +160,7 @@ def main_worker(gpu, ngpus_per_node, args):
             if "MASTER_PORT" in os.environ:
                 pass  # use MASTER_PORT in the environment variable
             else:
-                os.environ["MASTER_PORT"] = "29500"
+                os.environ["MASTER_PORT"] = find_free_port()
         dist.init_process_group(
             backend=args.dist_backend,
             init_method=args.dist_url,
@@ -280,6 +280,15 @@ def test(test_loader, model, args):
               (i, 2000 / args.batch_size, load_time, inference_time, proc_time))
         load_tic = time.time()
 
+def find_free_port():
+    """ https://stackoverflow.com/questions/1365265/on-localhost-how-do-i-pick-a-free-port-number """
+    import socket
+    from contextlib import closing
+
+    with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
+        s.bind(('', 0))
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        return str(s.getsockname()[1])
 
 if __name__ == "__main__":
     main()
