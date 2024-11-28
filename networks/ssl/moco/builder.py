@@ -28,10 +28,10 @@ class MoCo(nn.Module):
         self.T = T
         # create the encoders
         # num_classes is the output fc dimension
-        self.encoder_q = base_encoder(input_data='radar')
-        self.encoder_k = base_encoder(input_data='image')
+        self.encoder_q = base_encoder()
+        self.encoder_k = base_encoder()
 
-        dim_mlp = 327680
+        dim_mlp = 65536
         self.mlp_q = nn.Sequential(
             nn.Flatten(), nn.Linear(dim_mlp, dim), nn.ReLU()
         )
