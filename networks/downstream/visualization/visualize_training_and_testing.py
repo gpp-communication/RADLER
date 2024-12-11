@@ -88,9 +88,9 @@ def visualize_test_img(fig_name, img_path, radar_data, output_confmap, gt_confma
 
 if __name__ == '__main__':
     fig_name = 'test1'
-    img_path = '/Users/yluo/Project/Radio-Vision-CityGML/datasets/test/test/IMAGES_0/000000.png'
-    radar_path = '/Users/yluo/Project/Radio-Vision-CityGML/datasets/test/test/RADAR_RA_H/000000.npy'
-    gt_confmap_path = '/Users/yluo/Project/Radio-Vision-CityGML/datasets/test/test/GT_CONFMAPS/000000.npy'
+    img_path = '/datasets/test/test-1/IMAGES_0/000000.png'
+    radar_path = '/datasets/test/test-1/RADAR_RA_H/000000.npy'
+    gt_confmap_path = '/datasets/test/test-1/GT_CONFMAPS/000000.npy'
     radar_data = np.load(radar_path)
     output_confmap = torch.rand(3, 224, 221)
     results = post_process_single_frame(output_confmap)

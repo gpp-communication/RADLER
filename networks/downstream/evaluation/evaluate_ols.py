@@ -350,8 +350,8 @@ def evaluate(data_path, submit_dir, truth_dir):
 
 
 if __name__ == '__main__':
-    data_path = '/Users/yluo/Pictures/CRTUM_new/data_cluster_1_2/downstream/test'
+    data_path = '/Users/yluo/Pictures/CRTUM_new/data_cluster_1_2/downstream/test-1'
     # sub_path = '/Users/yluo/Downloads/res/res'
     sub_path = '/Users/yluo/Downloads/res/rod-res'
-    truth_dir = '/Users/yluo/Pictures/CRTUM_new/data_cluster_1_2/downstream/annotations/test'
+    truth_dir = '/Users/yluo/Pictures/CRTUM_new/data_cluster_1_2/downstream/annotations/test-1'
     evaluate(data_path, sub_path, truth_dir)
