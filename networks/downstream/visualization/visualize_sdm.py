@@ -39,14 +39,15 @@ downstream_dataset = DownstreamDataset('../../../datasets/test/visualize_sdm/', 
 with torch.no_grad():
     dataloader = DataLoader(downstream_dataset, batch_size=1, shuffle=True, num_workers=0)
     for image_path, radar, semantic_depth, gt_conf in dataloader:
-        output_sdm = detector_sdm(radar, semantic_depth)
+        # output_sdm = detector_sdm(radar, semantic_depth)
         output_no_sdm = detector_no_sdm(radar)
+
         # np.save(image_path[0].replace('IMAGES_0/', '').replace('.png', '_sdm.npy'), output_sdm)
         # np.save(image_path[0].replace('IMAGES_0/', '').replace('.png', '_no_sdm.npy'), output_no_sdm)
-        diff = output_sdm - output_no_sdm
-        diff = np.transpose(np.squeeze(diff), (1, 2, 0))
-        plt.axis('off')
-        plt.imshow(diff, vmin=0, vmax=1, origin='lower', aspect='auto')
-        plt.savefig(image_path[0].replace('.png', '_diff.png').replace('IMAGES_0/', ''), bbox_inches='tight')
-        plt.cla()
+        # diff = output_sdm - output_no_sdm
+        # diff = np.transpose(np.squeeze(diff), (1, 2, 0))
+        # plt.axis('off')
+        # plt.imshow(diff, vmin=0, vmax=1, origin='lower', aspect='auto')
+        # plt.savefig(image_path[0].replace('.png', '_diff.png').replace('IMAGES_0/', ''), bbox_inches='tight')
+        # plt.cla()
 

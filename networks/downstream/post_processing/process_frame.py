@@ -49,7 +49,7 @@ def detect_peaks(image, search_size, threshold=0.3):
 
 
 def get_ols_btw_objects(obj1, obj2):
-    with open('/home/stud/luoyu/storage/user/luoyu/projects/Radio-Vision-CityGML/networks/downstream/configs/object_config.json') as f:
+    with open('/Users/yluo/Project/Radio-Vision-CityGML/networks/downstream/configs/object_config.json') as f:
         object_cfg = json.load(f)
 
     classes = object_cfg["classes"]
@@ -86,7 +86,7 @@ def lnms(obj_dicts_in_class):
     :param config_dict:
     :return:
     """
-    with open('/home/stud/luoyu/storage/user/luoyu/projects/Radio-Vision-CityGML/networks/downstream/configs/model_config.json') as f:
+    with open('/Users/yluo/Project/Radio-Vision-CityGML/networks/downstream/configs/model_config.json') as f:
         model_configs = json.load(f)
     detect_mat = - np.ones((model_configs['max_dets'], 4))
     cur_det_id = 0
@@ -118,12 +118,12 @@ def post_process_single_frame(confmap):
     :param confmap: predicted confidence map [n_class, ramap_r, ramap_a]
     :return: [1, max_dets, 4]
     """
-    with open('/home/stud/luoyu/storage/user/luoyu/projects/Radio-Vision-CityGML/networks/downstream/configs/radar_config.json') as f:
+    with open('/Users/yluo/Project/Radio-Vision-CityGML/networks/downstream/configs/radar_config.json') as f:
         radar_configs = json.load(f)
     n_class = 3
     rng_grid = confmap2ra('range', radar_configs)
     agl_grid = confmap2ra('angle', radar_configs)
-    with open('/home/stud/luoyu/storage/user/luoyu/projects/Radio-Vision-CityGML/networks/downstream/configs/model_config.json') as f:
+    with open('/Users/yluo/Project/Radio-Vision-CityGML/networks/downstream/configs/model_config.json') as f:
         model_configs = json.load(f)
     max_dets = model_configs['max_dets']
     peak_thres = model_configs['peak_thres']
@@ -169,12 +169,13 @@ def post_process_single_frame(confmap):
 
 
 if __name__ == '__main__':
-    test = torch.randn(2, 3, 224, 224)
-    model = RadarObjectDetector('/Users/yluo/Downloads/checkpoint_0059.pth.tar', fuse_semantic_depth_feature=False)
-    model.eval()
-    with torch.no_grad():
-        output = model(test)
-    output = output.detach().cpu().numpy()
+    # test = torch.randn(2, 3, 224, 224)
+    # model = RadarObjectDetector('/Users/yluo/Downloads/checkpoint_0059.pth.tar', fuse_semantic_depth_feature=False)
+    # model.eval()
+    # with torch.no_grad():
+    #     output = model(test)
+    # output = output.detach().cpu().numpy()
+    output = np.load('/Users/yluo/Project/Radio-Vision-CityGML/datasets/test/visualize_sdm/test-1/000095_sdm.npy')
     for i in range(output.shape[0]):
         results = post_process_single_frame(output[i])
         print(i, results)

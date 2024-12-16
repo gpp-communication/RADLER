@@ -36,7 +36,7 @@ def visualize_training(fig_name, img_path, radar_data, output_confmap, gt_confma
 
 def visualize_test_img(fig_name, img_path, radar_data, output_confmap, gt_confmap, res_final):
     max_dets, _ = res_final.shape
-    with open('/home/stud/luoyu/storage/user/luoyu/projects/Radio-Vision-CityGML/networks/downstream/configs/object_config.json', 'r') as f:
+    with open('/Users/yluo/Project/Radio-Vision-CityGML/networks/downstream/configs/object_config.json', 'r') as f:
         object_cfg = json.load(f)
     classes = object_cfg['classes']
 
@@ -60,19 +60,22 @@ def visualize_test_img(fig_name, img_path, radar_data, output_confmap, gt_confma
     fig.add_subplot(2, 2, 3)
     output_confmap = np.transpose(output_confmap, (1, 2, 0))
     output_confmap[output_confmap < 0] = 0
+    # output_confmap[:] = 1
     plt.imshow(output_confmap, vmin=0, vmax=1, origin='lower', aspect='auto')
-    for d in range(max_dets):
-        cla_id = int(res_final[d, 0])
-        if cla_id == -1:
-            continue
-        row_id = res_final[d, 1]
-        col_id = res_final[d, 2]
-        conf = res_final[d, 3]
-        conf = 1.0 if conf > 1 else conf
-        cla_str = get_class_name(cla_id, classes)
-        plt.scatter(col_id, row_id, s=10, c='white')
-        text = cla_str + '\n%.2f' % conf
-        plt.text(col_id + 5, row_id, text, color='white', fontsize=10)
+    # colors = ['red', 'green', 'blue']
+    # for d in range(max_dets):
+    #     cla_id = int(res_final[d, 0])
+    #     if cla_id == -1:
+    #         continue
+    #     row_id = res_final[d, 1]
+    #     col_id = res_final[d, 2]
+    #     conf = res_final[d, 3]
+    #     conf = 1.0 if conf > 1 else conf
+    #     cla_str = get_class_name(cla_id, classes)
+    #     plt.scatter(col_id, row_id, s=10, c=colors[int(res_final[d, 0])])
+    #     text = cla_str + '\n%.2f' % conf
+    #     plt.text(col_id - 12, row_id + 10, text, color=colors[int(res_final[d, 0])], fontsize=16)
+    # plt.grid(color='#0f0f0f', linestyle='--', linewidth=0.8)
     plt.axis('off')
     plt.title("Downstream Detection")
 
@@ -88,11 +91,12 @@ def visualize_test_img(fig_name, img_path, radar_data, output_confmap, gt_confma
 
 if __name__ == '__main__':
     fig_name = 'test1'
-    img_path = '/datasets/test/test-1/IMAGES_0/000000.png'
-    radar_path = '/datasets/test/test-1/RADAR_RA_H/000000.npy'
-    gt_confmap_path = '/datasets/test/test-1/GT_CONFMAPS/000000.npy'
+    img_path = '/Users/yluo/Project/Radio-Vision-CityGML/datasets/test/visualize_sdm/test-1/IMAGES_0/000095.png'
+    radar_path = '/Users/yluo/Project/Radio-Vision-CityGML/datasets/test/visualize_sdm/test-1/RADAR_RA_H/000095.npy'
+    gt_confmap_path = '/Users/yluo/Project/Radio-Vision-CityGML/datasets/test/visualize_sdm/test-1/GT_CONFMAPS/000095.npy'
     radar_data = np.load(radar_path)
-    output_confmap = torch.rand(3, 224, 221)
+    output_confmap = np.load('/Users/yluo/Project/Radio-Vision-CityGML/datasets/test/visualize_sdm/test-1/000095_no_sdm.npy')
+    output_confmap = np.squeeze(output_confmap)
     results = post_process_single_frame(output_confmap)
     gt_confmap = np.load(gt_confmap_path)
     visualize_test_img(fig_name, img_path, radar_data, output_confmap, gt_confmap[:3, :, :,], results)
