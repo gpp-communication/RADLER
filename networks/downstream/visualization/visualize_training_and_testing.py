@@ -60,22 +60,22 @@ def visualize_test_img(fig_name, img_path, radar_data, output_confmap, gt_confma
     fig.add_subplot(2, 2, 3)
     output_confmap = np.transpose(output_confmap, (1, 2, 0))
     output_confmap[output_confmap < 0] = 0
-    # output_confmap[:] = 1
+    output_confmap[:] = 1
     plt.imshow(output_confmap, vmin=0, vmax=1, origin='lower', aspect='auto')
-    # colors = ['red', 'green', 'blue']
-    # for d in range(max_dets):
-    #     cla_id = int(res_final[d, 0])
-    #     if cla_id == -1:
-    #         continue
-    #     row_id = res_final[d, 1]
-    #     col_id = res_final[d, 2]
-    #     conf = res_final[d, 3]
-    #     conf = 1.0 if conf > 1 else conf
-    #     cla_str = get_class_name(cla_id, classes)
-    #     plt.scatter(col_id, row_id, s=10, c=colors[int(res_final[d, 0])])
-    #     text = cla_str + '\n%.2f' % conf
-    #     plt.text(col_id - 12, row_id + 10, text, color=colors[int(res_final[d, 0])], fontsize=16)
-    # plt.grid(color='#0f0f0f', linestyle='--', linewidth=0.8)
+    colors = ['red', 'green', 'blue']
+    for d in range(max_dets):
+        cla_id = int(res_final[d, 0])
+        if cla_id == -1:
+            continue
+        row_id = res_final[d, 1]
+        col_id = res_final[d, 2]
+        conf = res_final[d, 3]
+        conf = 1.0 if conf > 1 else conf
+        cla_str = get_class_name(cla_id, classes)
+        plt.scatter(col_id, row_id, s=10, c=colors[int(res_final[d, 0])])
+        text = cla_str + '\n%.2f' % conf
+        plt.text(col_id - 12, row_id + 10, text, color=colors[int(res_final[d, 0])], fontsize=16)
+    plt.grid(color='#0f0f0f', linestyle='--', linewidth=0.8)
     plt.axis('off')
     plt.title("Downstream Detection")
 
