@@ -63,6 +63,7 @@ def visualize_test_img(fig_name, img_path, radar_data, output_confmap, gt_confma
     output_confmap = np.transpose(output_confmap, (1, 2, 0))
     output_confmap[output_confmap < 0] = 0
     plt.imshow(output_confmap, vmin=0, vmax=1, origin='lower', aspect='auto')
+    colors = ['red', 'green', 'blue']
     for d in range(max_dets):
         cla_id = int(res_final[d, 0])
         if cla_id == -1:
