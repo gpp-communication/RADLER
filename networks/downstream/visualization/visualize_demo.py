@@ -9,7 +9,7 @@ from networks.downstream.post_processing import get_class_name, post_process_sin
 
 
 def visualize_demo_img(fig_name, img_path, confmap_no_sdm, res_final_no_sdm, confmap_sdm, res_final_sdm):
-    with open('/Users/yluo/Project/Radio-Vision-CityGML/networks/downstream/configs/object_config.json', 'r') as f:
+    with open('../../../networks/downstream/configs/object_config.json', 'r') as f:
         object_cfg = json.load(f)
     classes = object_cfg['classes']
 

@@ -18,9 +18,9 @@ def rename_keys(checkpoint):
     del state_dict
     return state_dict_new
 
-
-checkpoint_no_sdm = '/Users/yluo/Downloads/checkpoint_0059.pth.tar'
-checkpoint_sdm = '/Users/yluo/Downloads/checkpoint_0059_sdm.pth.tar'
+# TODO: load your checkpoint files here
+checkpoint_no_sdm = 'xx/checkpoint.pth.tar'
+checkpoint_sdm = 'xx/checkpoint_sdm.pth.tar'
 
 detector_sdm = RadarObjectDetector(None, 'test', 3, True)
 state_dict_sdm = rename_keys(checkpoint_sdm)
@@ -39,15 +39,14 @@ downstream_dataset = DownstreamDataset('../../../datasets/test/visualize_sdm/', 
 with torch.no_grad():
     dataloader = DataLoader(downstream_dataset, batch_size=1, shuffle=True, num_workers=0)
     for image_path, radar, semantic_depth, gt_conf in dataloader:
-        # output_sdm = detector_sdm(radar, semantic_depth)
+        output_sdm = detector_sdm(radar, semantic_depth)
         output_no_sdm = detector_no_sdm(radar)
-
-        # np.save(image_path[0].replace('IMAGES_0/', '').replace('.png', '_sdm.npy'), output_sdm)
-        # np.save(image_path[0].replace('IMAGES_0/', '').replace('.png', '_no_sdm.npy'), output_no_sdm)
-        # diff = output_sdm - output_no_sdm
-        # diff = np.transpose(np.squeeze(diff), (1, 2, 0))
-        # plt.axis('off')
-        # plt.imshow(diff, vmin=0, vmax=1, origin='lower', aspect='auto')
-        # plt.savefig(image_path[0].replace('.png', '_diff.png').replace('IMAGES_0/', ''), bbox_inches='tight')
-        # plt.cla()
+        np.save(image_path[0].replace('IMAGES_0/', '').replace('.png', '_sdm.npy'), output_sdm)
+        np.save(image_path[0].replace('IMAGES_0/', '').replace('.png', '_no_sdm.npy'), output_no_sdm)
+        diff = output_sdm - output_no_sdm
+        diff = np.transpose(np.squeeze(diff), (1, 2, 0))
+        plt.axis('off')
+        plt.imshow(diff, vmin=0, vmax=1, origin='lower', aspect='auto')
+        plt.savefig(image_path[0].replace('.png', '_diff.png').replace('IMAGES_0/', ''), bbox_inches='tight')
+        plt.cla()
 

@@ -36,7 +36,7 @@ def visualize_training(fig_name, img_path, radar_data, output_confmap, gt_confma
 
 def visualize_test_img(fig_name, img_path, radar_data, output_confmap, gt_confmap, res_final):
     max_dets, _ = res_final.shape
-    with open('/Users/yluo/Project/Radio-Vision-CityGML/networks/downstream/configs/object_config.json', 'r') as f:
+    with open('../../../networks/downstream/configs/object_config.json', 'r') as f:
         object_cfg = json.load(f)
     classes = object_cfg['classes']
 
@@ -76,7 +76,7 @@ def visualize_test_img(fig_name, img_path, radar_data, output_confmap, gt_confma
         text = cla_str + '\n%.2f' % conf
         plt.text(col_id - 12, row_id + 10, text, color=colors[int(res_final[d, 0])], fontsize=16)
     plt.grid(color='#0f0f0f', linestyle='--', linewidth=0.8)
-    plt.axis('off')
+    # plt.axis('off')
     plt.title("Downstream Detection")
 
     fig.add_subplot(2, 2, 4)
@@ -91,11 +91,11 @@ def visualize_test_img(fig_name, img_path, radar_data, output_confmap, gt_confma
 
 if __name__ == '__main__':
     fig_name = 'test1'
-    img_path = '/Users/yluo/Project/Radio-Vision-CityGML/datasets/test/visualize_sdm/test-1/IMAGES_0/000095.png'
-    radar_path = '/Users/yluo/Project/Radio-Vision-CityGML/datasets/test/visualize_sdm/test-1/RADAR_RA_H/000095.npy'
-    gt_confmap_path = '/Users/yluo/Project/Radio-Vision-CityGML/datasets/test/visualize_sdm/test-1/GT_CONFMAPS/000095.npy'
+    img_path = '../../../datasets/test/visualize_sdm/test-1/IMAGES_0/000095.png'
+    radar_path = '../../../datasets/test/visualize_sdm/test-1/RADAR_RA_H/000095.npy'
+    gt_confmap_path = '../../../datasets/test/visualize_sdm/test-1/GT_CONFMAPS/000095.npy'
     radar_data = np.load(radar_path)
-    output_confmap = np.load('/Users/yluo/Project/Radio-Vision-CityGML/datasets/test/visualize_sdm/test-1/000095_no_sdm.npy')
+    output_confmap = np.load('../../../datasets/test/visualize_sdm/test-1/000095_no_sdm.npy')
     output_confmap = np.squeeze(output_confmap)
     results = post_process_single_frame(output_confmap)
     gt_confmap = np.load(gt_confmap_path)
