@@ -1,4 +1,4 @@
-# Leveraging Semantic 3D City Models for Enhanced Radar Object Detection via Self-Supervised Radar-Image Learning
+# RADLER: Radar Object Detection Leveraging Semantic 3D City Models and Self-Supervised Radar-Image Learning
 
 ## Branches
 - **`main`**: Contains the model for experiments with the CRCTUM dataset.
