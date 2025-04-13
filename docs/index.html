@@ -188,14 +188,13 @@
             <p>
               Semantic 3D city models are worldwide easy-accessible, providing accurate, object-oriented, and
               semantic-rich 3D priors.
-              To the best of our knowledge, their potential to mitigate the noise impact on radar object detection
-              remains under-explored.
-              In this paper, we first introduce a new dataset, RadarCity,
-              comprising 54K synchronized radar-image pairs with semantic 3D city models collected in Munich, Germany.
-              Moreover, we introduce a novel neural network, RADLER,
-              leveraging the effectiveness of contrastive self-supervised learning (SSL) and semantic 3D city models to
-              enhance radar object detection.
-              Specifically, we first obtain the robust radar features via a SSL network in the radar-image pretext task.
+              To date, their potential to mitigate the noise impact on radar object detection remains under-explored.
+              In this paper, we first introduce a unique dataset, RadarCity, comprising 54K synchronized radar-image
+              pairs and semantic 3D city models.
+              Moreover, we propose a novel neural network, RADLER, leveraging the effectiveness of contrastive
+              self-supervised learning (SSL) and semantic 3D city models to enhance radar object detection of
+              pedestrians, cyclists, and cars.
+              Specifically, we first obtain the robust radar features via a SSL network in the radarimage pretext task.
               We then use a simple yet effective feature fusion strategy to incorporate semantic-depth features from
               semantic 3D city models.
               Having prior 3D information as guidance, RADLER obtains more fine-grained details to enhance radar object
@@ -203,6 +202,9 @@
               We extensively evaluate RADLER on the collected RadarCity dataset and demonstrate average
               improvements of 5.46% in mean average precision (mAP) and 3.51% in mean average recall (mAR) over previous
               radar object detection methods.
+              We believe this work will foster further research on semantic-guided and
+              map-supported radar object detection.
+              Our project page is publicly available at <a href="">https://gpp-communication.github.io/RADLER/</a>.
             </p>
           </div>
         </div>
