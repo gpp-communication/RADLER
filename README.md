@@ -1,7 +1,7 @@
 # RADLER: Radar Object Detection Leveraging Semantic 3D City Models and Self-Supervised Radar-Image Learning
 
 ## Branches
-- **`main`**: Contains the model for experiments with the CRCTUM dataset.
+- **`main`**: Contains the model for experiments with the RadarCity dataset.
 - **`ssl-rodnet-encoders`**: Includes code for contrastive SSL training of RODNet-CDC's encoder using the CRUW dataset.
 
 ## Program Structure
@@ -18,7 +18,7 @@
 
 ## Datasets
 
-### CRCTUM Dataset
+### RadarCity Dataset
 Download the dataset [here](#).
 
 ### CRUW Dataset
@@ -31,7 +31,7 @@ Additional steps for using the CRUW dataset with the `ssl-rodnet-encoders` branc
 ## Running the Program
 Refer to the [MoCo](https://github.com/facebookresearch/moco) project for the environmental setup. A `Slurm` environment is assumed, with the following example scripts provided:
 
-### Pretext Training on the CRCTUM Dataset
+### Pretext Training on the RadarCity Dataset
 ```bash
 #!/bin/bash
 #SBATCH --job-name="moco-pretext"
@@ -44,10 +44,10 @@ Refer to the [MoCo](https://github.com/facebookresearch/moco) project for the en
 #SBATCH --output=/storage/slurm/logs/slurm-%j.out
 #SBATCH --error=/storage/slurm/logs/slurm-%j.err
 export NCCL_P2P_DISABLE=1
-srun python main_moco.py './datasets/CRCTUM/data_cluster_1_2/pretext' --epochs 150 --world-size 1 --workers 12 --dist-url 'env://' --multiprocessing-distributed --batch-size 64 --learning-rate 0.000001 --moco-k 512 --save-frequency 10 --checkpoints-dir ./logs/checkpoints/CRCTUM/
+srun python main_moco.py './datasets/RadarCity/data_cluster_1_2/pretext' --epochs 150 --world-size 1 --workers 12 --dist-url 'env://' --multiprocessing-distributed --batch-size 64 --learning-rate 0.000001 --moco-k 512 --save-frequency 10 --checkpoints-dir ./logs/checkpoints/RadarCity/
 ```
 
-### Downstream Training on the CRCTUM Dataset
+### Downstream Training on the RadarCity Dataset
 ```bash
 #!/bin/bash
 #SBATCH --job-name="moco-downstream"
@@ -63,7 +63,7 @@ srun python main_downstream_train.py './datasets/CRTUM/data_cluster_1_2/downstre
 #srun python main_downstream_train.py './datasets/CRTUM/data_cluster_1_2/downstream/sequences/train' --epochs 60 --world-size 1 --workers 8 --dist-url 'env://' --multiprocessing-distributed --batch-size 32 --learning-rate 0.001 --checkpoints-dir ./logs/checkpoints/downstream/no-sdm/ --pretrained ./logs/checkpoints/ssl/checkpoint_file_from_pretrain.pth.tar --save-frequency 10
 ```
 
-### Downstream Testing on the CRCTUM Dataset
+### Downstream Testing on the RadarCity Dataset
 ```bash
 #!/bin/bash
 #SBATCH --job-name="moco-downstream"
